@@ -19,11 +19,13 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
 {
     builder
     .AddFilterExpression<DbContext>()
-    //.AddAuthorizeWhereClause<Subject>((p, opt) =>
-    //{
-    //    opt.AddRoles(new string[] { }, x => x.Name == "hello2");
-    //}) 
-    ;
+    .AddWhereClause<Student>(p => x => x.Name.Contains("hello1"))
+    .AddWhereClause<Teacher>(p => x => x.Name.Contains("hello3"))
+    .AddAuthorizeWhereClause<Subject>((p, opt) =>
+    {
+        opt.AddRoles(new string[] { "Admin" }, x => x.Name == "hello2");
+        opt.AddRoles(new string[] { "User" }, x => x.Name == "hello1");
+    });
 
     builder.FieldBuilder = b =>
     {
