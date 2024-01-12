@@ -1,4 +1,5 @@
-﻿using EntityGraphQL.Schema;
+﻿using Dino.GraphqlLib.Mutations;
+using EntityGraphQL.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,19 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
     public interface IWhereClauseAuthorizeCollection<TModel>
         where TModel : class
     {
+        /// <summary>
+        ///Any roles
+        /// </summary>
+        /// <param name="Roles"></param>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<List<string>> Roles, Expression<Func<TModel, bool>> expression);
+        /// <summary>
+        /// Any roles
+        /// </summary>
+        /// <param name="Roles"></param>
+        /// <param name="expression"></param>
+        /// <returns></returns>
         IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<string> Roles, Expression<Func<TModel, bool>> expression);
         IWhereClauseAuthorizeCollection<TModel> AddRoles(Action<RequiredAuthorization> action, Expression<Func<TModel, bool>> expression);
         IWhereClauseAuthorizeCollection<TModel> AddRoles(RequiredAuthorization requiredAuthorization, Expression<Func<TModel, bool>> expression);
@@ -53,5 +66,6 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         {
             return AddRoles(new[] { Roles.ToList() }, expression);
         }
+
     }
 }

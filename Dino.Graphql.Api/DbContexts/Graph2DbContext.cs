@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EntityGraphQL.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dino.Graphql.Api.DbContexts
 {

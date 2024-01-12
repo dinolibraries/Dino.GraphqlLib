@@ -83,7 +83,7 @@ namespace Dino.GraphqlLib.Tests
 
             }
         }
-    
+
         [Theory]
         [InlineData(Queryhelper.SubjectQuery)]
         [InlineData(Queryhelper.SubjectPageQuery)]
@@ -182,6 +182,109 @@ namespace Dino.GraphqlLib.Tests
             httpAccessor.HttpContext = ServiceHelper.GetHttpContext(new ServiceHelper.HttpContextOption
             {
                 Roles = roles
+            });
+
+            var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();
+            var graphqlRequest = new QueryRequest();
+            graphqlRequest.Query = Queryhelper.SubjectPageQuery;
+            var result = schemaProvider.ExecuteRequest(graphqlRequest, provider, httpAccessor.HttpContext.User);
+
+            var value = result.Data.Values.FirstOrDefault() as dynamic;
+            var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
+            Assert.True(temp == resultValue);
+        }
+
+        [Theory]
+        [InlineData(RoleHelper.AdminSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.User }, "hello1", "hello1")]
+        [InlineData(RoleHelper.AdminSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.Admin }, "hello1", "hello1")]
+        [InlineData(RoleHelper.AdminSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.Admin, RoleHelper.UserSite }, "hello1", null)]
+        [InlineData(RoleHelper.UserSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.Admin, RoleHelper.UserSite }, "hello1", "hello1")]
+        [InlineData(RoleHelper.UserSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.User, RoleHelper.UserSite }, "hello1", "hello1")]
+        public void AttachSite(string Site, string[] roles, string[] releRequireds, string condition, string resultValue)
+        {
+            var services = ServiceHelper.GetServiceCollectionBase();
+
+            services.AddGraphql<ComplexGraphqlSchema>(builder =>
+            {
+                builder.AddFilterExpression<DbContext>()
+                .AddSiteRoleTransformation(x =>
+                {
+                    return new[] { Site };
+                })
+                .AddAuthorizeWhereClause<Subject>((p, opt) =>
+                {
+                    var value = condition;
+                    opt.AddRoles(roles => roles.RequiresAllRoles(releRequireds), x => x.Name == value);
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+            provider.UseGraphql();
+
+            InitialDbContext(provider);
+
+            var httpAccessor = provider.GetService<IHttpContextAccessor>();
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(new ServiceHelper.HttpContextOption
+            {
+                Roles = roles,
+                Site = Site,
+            });
+
+            var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();
+            var graphqlRequest = new QueryRequest();
+            graphqlRequest.Query = Queryhelper.SubjectPageQuery;
+            var result = schemaProvider.ExecuteRequest(graphqlRequest, provider, httpAccessor.HttpContext.User);
+
+            var value = result.Data.Values.FirstOrDefault() as dynamic;
+            var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
+            Assert.True(temp == resultValue);
+        }
+
+        private string[][] RequiedRoles = new[] {
+            new[] { "hello3", RoleHelper.Admin, RoleHelper.UserSite },
+            new[] { "hello4", RoleHelper.Admin, RoleHelper.AdminSite },
+            new[] { "hello5", RoleHelper.User, RoleHelper.UserSite },
+            new[] { "hello1", RoleHelper.User } ,
+            new[] { "hello2", RoleHelper.Admin },
+        };
+
+        [Theory]
+        [InlineData(RoleHelper.AdminSite, new[] { RoleHelper.Admin, RoleHelper.User }, "hello4")]
+        [InlineData(RoleHelper.TestSite, new[] { RoleHelper.Admin }, "hello2")]
+        [InlineData(RoleHelper.UserSite, new[] { RoleHelper.Admin }, "hello3")]
+        [InlineData(RoleHelper.UserSite, new[] { RoleHelper.User }, "hello5")]
+        [InlineData(RoleHelper.TestSite, new[] { RoleHelper.Manage }, null)]
+        public void AttachSite2(string Site, string[] roles, string resultValue)
+        {
+            var services = ServiceHelper.GetServiceCollectionBase();
+
+            services.AddGraphql<ComplexGraphqlSchema>(builder =>
+            {
+                builder.AddFilterExpression<DbContext>()
+                .AddSiteRoleTransformation(x =>
+                {
+                    return new[] { Site };
+                })
+                .AddAuthorizeWhereClause<Subject>((p, opt) =>
+                {
+                    foreach (var role in RequiedRoles)
+                    {
+                        var value = role[0];
+                        opt.AddRoles(roles => roles.RequiresAllRoles(role.Skip(1).ToArray()), x => x.Name == value);
+                    }
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+            provider.UseGraphql();
+
+            InitialDbContext(provider);
+
+            var httpAccessor = provider.GetService<IHttpContextAccessor>();
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(new ServiceHelper.HttpContextOption
+            {
+                Roles = roles,
+                Site = Site,
             });
 
             var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();

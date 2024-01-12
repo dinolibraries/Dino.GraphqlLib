@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
@@ -81,6 +82,7 @@ namespace Dino.GraphqlLib.Tests
         public class HttpContextOption
         {
             public string[] Roles { get; set; }
+            public string Site { get; set; }
         }
         public static HttpContext GetHttpContext(HttpContextOption httpContextOption)
         {
@@ -88,14 +90,19 @@ namespace Dino.GraphqlLib.Tests
 
             // User is logged in
             httpcontext.User = new GenericPrincipal(
-                new GenericIdentity("username"),
-                httpContextOption.Roles
-                );
+               new GenericIdentity("username"),
+               httpContextOption.Roles
+            );
+
+            if (!string.IsNullOrEmpty(httpContextOption.Site))
+            {
+                var identity = httpcontext.User.Identity as ClaimsIdentity;
+                httpcontext.User.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim(identity.RoleClaimType, httpContextOption.Site) }));
+            }
 
             //// User is logged out
             //httpcontext.User = new GenericPrincipal(
             //    new GenericIdentity(String.Empty),
-            //    new string[] { "User", "Admin" }
             //    );
             return httpcontext;
         }

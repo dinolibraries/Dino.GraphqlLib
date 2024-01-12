@@ -77,20 +77,25 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
 {
+    //horizontal segmentation
     builder
     .AddFilterExpression<DbContext>() // This line will filter all fields that are DbSet in the 2 DbContexts in ComplexSchema and add extentions to it:
-                                      //  - UseFilter.
-                                      //  - UseOffsetPaging.
-                                      //  - UseExpressionFilter (horizontal data fragmentation).
+                                    //  - UseFilter.
+                                    //  - UseOffsetPaging.
+                                    //  - UseExpressionFilter (horizontal data fragmentation).
+    .AddSiteRoleTransformation(context =>
+    {
+        return context.Request.Path.StartsWithSegments("admin") ? new[] { "ADMIN" } : null;
+    })
     .AddWhereClause<Student>(p => x => x.Name.Contains("hello1"))
     .AddWhereClause<Teacher>(p => x => x.Name.Contains("hello3"))
     .AddAuthorizeWhereClause<Subject>((p, opt) =>
     {
-        //
-        opt.AddRoles(new string[] { "Admin" }, x => x.Name == "hello2");
-        opt.AddRoles(new string[] { "User" }, x => x.Name == "hello1");
+        opt.AddRoles(x => x.RequiresAllRoles("Admin", SiteHelper.GetRoleSite("ADMINSITE")), x => x.Name == "hello2");
+        opt.AddRoles(new string[] { "User", SiteHelper.GetRoleSite("ADMINSITE") }, x => x.Name == "hello1");
     });
 
+    // Mutation config
     builder.FieldBuilder = b =>
     {
         b
@@ -101,6 +106,20 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
     };
 });
 ```
+-   Add sitename to ClaimsIdentity.
+  ```c#
+.AddSiteRoleTransformation(context =>
+{
+    return context.Request.Path.StartsWithSegments("admin") ? new[] { "ADMIN" } : null;
+})
+  ```
+If the Url starts with **/admin**, then a Role will be added with the name **ADMIN** with the suffix **graph-site** and all will be in lowercase. (**admin-graph-site**)
+
+```c#
+var role = SiteHelper.GetRoleSite("ADMIN"); // admin-graph-site
+context.User.IsInRole(role); // True
+```
+
 ## 3. DbContextSelector1.
 This is a class that inherits from 
 ```c#
@@ -165,3 +184,47 @@ public class DbContextService<TSchemaContext, TModel, TDbSelector> : IDbContextS
     }
 }
 ```
+## 5. Add JwtBearer and JWT.io
+-   Identity server: 
+    -   [JWT.IO](https://jwt.io)
+    -   [JWT Authentication](https://manage.auth0.com/)
+- Add Configuration :
+```c#
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(o =>
+{
+    o.Authority = "https://dev-vfwqs18vq3lg083q.us.auth0.com";
+    o.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateAudience = false,
+    };
+    o.BackchannelHttpHandler = new HttpClientHandler
+    {
+        //Only development mode.
+        ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
+    };
+    o.Events = new JwtBearerEvents
+    {
+        OnForbidden = async (context) =>
+        {
+
+        },
+        OnTokenValidated = async (context) =>
+        {
+
+        },
+        OnAuthenticationFailed = async (context) =>
+        {
+
+        },
+        OnMessageReceived = async (context) =>
+        {
+
+        }
+    };
+});
+  ```

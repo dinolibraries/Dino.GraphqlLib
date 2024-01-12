@@ -6,6 +6,9 @@ using Dino.GraphqlLib.Infrastructures;
 using Dino.Graphql.Api.Mutations;
 using Dino.Graphql.Api.Mutations.ModelViews;
 using Dino.Graphql.Api.Mutations.DbSelectors;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Dino.GraphqlLib.Utilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,17 +17,61 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<Graph1DbContext>(opt => opt.UseInMemoryDatabase("Demo1"));
 builder.Services.AddDbContext<Graph2DbContext>(opt => opt.UseInMemoryDatabase("Demo2"));
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(o =>
+{
+    o.Authority = "https://dev-vfwqs18vq3lg083q.us.auth0.com";
+    o.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateAudience = false,
+    };
+    o.BackchannelHttpHandler = new HttpClientHandler
+    {
+        ServerCertificateCustomValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
+    };
+    o.Events = new JwtBearerEvents
+    {
+        OnForbidden = async (context) =>
+        {
+
+        },
+        OnTokenValidated = async (context) =>
+        {
+
+        },
+        OnAuthenticationFailed = async (context) =>
+        {
+
+        },
+        OnMessageReceived = async (context) =>
+        {
+
+        }
+    };
+});
+builder.Services.AddAuthorization();
 
 builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
 {
     builder
-    .AddFilterExpression<DbContext>()
+    .AddFilterExpression<DbContext>() // This line will filter all fields that are DbSet in the 2 DbContexts in ComplexSchema and add extentions to it:
+                                      //  - UseFilter.
+                                      //  - UseOffsetPaging.
+                                      //  - UseExpressionFilter (horizontal data fragmentation).
+    .AddSiteRoleTransformation(context =>
+    {
+        return context.Request.Path.StartsWithSegments("admin") ? new[] { "ADMIN" } : null;
+    })
     .AddWhereClause<Student>(p => x => x.Name.Contains("hello1"))
     .AddWhereClause<Teacher>(p => x => x.Name.Contains("hello3"))
     .AddAuthorizeWhereClause<Subject>((p, opt) =>
     {
-        opt.AddRoles(new string[] { "Admin" }, x => x.Name == "hello2");
-        opt.AddRoles(new string[] { "User" }, x => x.Name == "hello1");
+        opt.AddRoles(x => x.RequiresAllRoles("Admin", SiteHelper.GetRoleSite("ADMINSITE")), x => x.Name == "hello2");
+        opt.AddRoles(new string[] { "User", SiteHelper.GetRoleSite("ADMINSITE") }, x => x.Name == "hello1");
     });
 
     builder.FieldBuilder = b =>
@@ -40,6 +87,10 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
 // Add services to the container.
 
 builder.Services.AddControllers();
+
+
+
+
 
 var app = builder.Build();
 using (var scope = app.Services.CreateScope())
@@ -79,9 +130,10 @@ using (var scope = app.Services.CreateScope())
 
 app.UseHttpsRedirection();
 app.UseGraphql();
-
-app.UseAuthorization();
 app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 app.MapGraphQL<ComplexGraphqlSchema>();
 app.Run();

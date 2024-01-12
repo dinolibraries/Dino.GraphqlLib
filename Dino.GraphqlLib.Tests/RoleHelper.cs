@@ -11,5 +11,8 @@ namespace Dino.GraphqlLib.Tests
         public const string Admin = "Admin";
         public const string User = "User";
         public const string Manage = "Manage";
+        public const string AdminSite = "AdminSite";
+        public const string UserSite = "UserSite";
+        public const string TestSite = "TestSite";
     }
 }

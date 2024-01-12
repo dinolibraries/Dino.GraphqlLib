@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Dino.GraphqlLib.Mutations;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +17,8 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         IExpressionFilterCollection AddWhereClause<TWhereClause, TModel>() where TModel : class where TWhereClause : class, IExpressionFilter<TModel>;
         IExpressionFilterCollection AddWhereClause<TModel>(Func<IServiceProvider, Expression<Func<TModel, bool>>> action) where TModel : class;
         IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IServiceProvider, IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class;
+        IExpressionFilterCollection AddSiteClaimTransformation<T>() where T : CallbackAttachSite;
+        IExpressionFilterCollection AddSiteRoleTransformation(Func<HttpContext, IEnumerable<string>> Action);
     }
 
     public class ExpressionFilterCollection : IExpressionFilterCollection
@@ -27,16 +33,14 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         {
             _instance = null;
         }
+        //Service
+
         public IServiceCollection Services { get; set; }
         public void SetupService(IServiceCollection services)
         {
             Services = services;
         }
-        public IServiceProvider Provider { get; set; }
-        public void SetupProvider(IServiceProvider serviceProvider)
-        {
-            Provider = serviceProvider;
-        }
+
         public IExpressionFilterCollection AddWhereClause<TWhereClause, TModel>()
            where TModel : class
            where TWhereClause : class, IExpressionFilter<TModel>
@@ -56,6 +60,8 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             Services.AddScoped<IExpressionFilter<TModel>>(x => ActivatorUtilities.CreateInstance<ExpressionFilterDefault<TModel>>(x, action(Provider)));
             return this;
         }
+
+
         public IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IServiceProvider, IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class
         {
             var builder = new ExpressionAuthorizeCollection<TModel>();
@@ -63,6 +69,29 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             Services.AddScoped<IExpressionFilter<TModel>>(builder.GetService);
             return this;
         }
+
+        public IExpressionFilterCollection AddSiteClaimTransformation<T>() where T : CallbackAttachSite
+        {
+            Services.AddTransient<IClaimsTransformation, AttachSiteToClaimsTransformation>();
+            Services.AddTransient<CallbackAttachSite, T>();
+            return this;
+        }
+
+        public IExpressionFilterCollection AddSiteRoleTransformation(Func<HttpContext,IEnumerable<string>> Action)
+        {
+            Services.AddTransient<IClaimsTransformation, AttachSiteToClaimsTransformation>();
+            Services.AddTransient(p => new CallbackAttachSite() { GetSite = Action });
+            return this;
+        }
+
+
+        //Provider
+        public IServiceProvider Provider { get; set; }
+        public void SetupProvider(IServiceProvider serviceProvider)
+        {
+            Provider = serviceProvider;
+        }
+
         public Expression GetExpression<TModel>(Expression expression)
             where TModel : class
         {
@@ -75,6 +104,8 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
 
             return method.Invoke(this, new[] { expression }) as Expression;
         }
+
+
     }
 
 }
