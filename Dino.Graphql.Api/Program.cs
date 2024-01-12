@@ -64,7 +64,9 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
                                       //  - UseExpressionFilter (horizontal data fragmentation).
     .AddSiteRoleTransformation(context =>
     {
-        return context.Request.Path.StartsWithSegments("admin") ? new[] { "ADMIN" } : null;
+        var role = SiteHelper.GetRoleSite("ADMIN"); // admin-graph-site
+        context.User.IsInRole(SiteHelper.GetRoleSite("ADMIN")); // True
+        return context.Request.Path.StartsWithSegments("/admin") ? new[] { "ADMIN" } : null;
     })
     .AddWhereClause<Student>(p => x => x.Name.Contains("hello1"))
     .AddWhereClause<Teacher>(p => x => x.Name.Contains("hello3"))

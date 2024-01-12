@@ -2,7 +2,6 @@
 using Dino.GraphqlLib.Tests.Mutations;
 using EntityGraphQL.Schema;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
 using System;

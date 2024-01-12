@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dino.GraphqlLib", "Dino.GraphqlLib\Dino.GraphqlLib.csproj", "{5917951D-CCFE-4B54-9C14-C9FC68BA2F6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dino.GraphqlLib", "Dino.GraphqlLib\Dino.GraphqlLib.csproj", "{5917951D-CCFE-4B54-9C14-C9FC68BA2F6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dino.GraphqlLib.Tests", "Dino.GraphqlLib.Tests\Dino.GraphqlLib.Tests.csproj", "{3A718599-EC3C-4303-A901-0B1208A381E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dino.GraphqlLib.Tests", "Dino.GraphqlLib.Tests\Dino.GraphqlLib.Tests.csproj", "{3A718599-EC3C-4303-A901-0B1208A381E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dino.Graphql.Api", "Dino.Graphql.Api\Dino.Graphql.Api.csproj", "{5080447A-1ABE-421A-B9F2-D626EB436337}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dino.Graphql.Api", "Dino.Graphql.Api\Dino.Graphql.Api.csproj", "{5080447A-1ABE-421A-B9F2-D626EB436337}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

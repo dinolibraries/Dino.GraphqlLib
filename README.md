@@ -110,7 +110,7 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
   ```c#
 .AddSiteRoleTransformation(context =>
 {
-    return context.Request.Path.StartsWithSegments("admin") ? new[] { "ADMIN" } : null;
+    return context.Request.Path.StartsWithSegments("/admin") ? new[] { "ADMIN" } : null;
 })
   ```
 If the Url starts with **/admin**, then a Role will be added with the name **ADMIN** with the suffix **graph-site** and all will be in lowercase. (**admin-graph-site**)

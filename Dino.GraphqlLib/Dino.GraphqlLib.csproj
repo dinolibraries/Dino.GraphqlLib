@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
-
+	  <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+	  <ImplicitUsings>enable</ImplicitUsings>
+</PropertyGroup>
   <ItemGroup>
     <PackageReference Include="EntityGraphQL" Version="5.1.0" />
     <PackageReference Include="EntityGraphQL.AspNet" Version="5.1.0" />
