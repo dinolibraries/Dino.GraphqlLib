@@ -2,13 +2,15 @@
 
 ## [EntityGraphQL](https://entitygraphql.github.io/) extension library for .NET Core
 
-![Build](https://github.com/lukemurray/EntityGraphQL/actions/workflows/dotnet.yml/badge.svg)
+![Build](https://github.com/dinolibraries/Dino.GraphqlLib/assets/badge.svg)
 
 Dino.GraphqlLib extends some additional features:
 - Based on roles to be able to horizontally fragment data.
 - Add a quick CRUD mutation based on DbContext.
 - Does not depend on ef core.
+## Installation
 
+The [Dino.GraphqlLib![Nuget](https://img.shields.io/nuget/dt/Dino.GraphqlLib)](https://www.nuget.org/packages/Dino.GraphqlLib)  package will get you easily set up with ASP.NET.
 # Get started quickly with 1 ComplexShema and 2 DbContexts
 
 ## 1. Define your DbContexts
