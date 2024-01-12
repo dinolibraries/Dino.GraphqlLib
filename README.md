@@ -2,7 +2,7 @@
 
 ## [EntityGraphQL](https://entitygraphql.github.io/) extension library for .NET Core
 
-![Build]([https://github.com/dinolibraries/Dino.GraphqlLib/assets/badge.svg](https://raw.githubusercontent.com/dinolibraries/Dino.GraphqlLib/013fc61f8892fea455550de493fd58d84114f31f/assets/badge.svg)
+![Build](https://raw.githubusercontent.com/dinolibraries/Dino.GraphqlLib/013fc61f8892fea455550de493fd58d84114f31f/assets/badge.svg)
 
 Dino.GraphqlLib extends some additional features:
 - Based on roles to be able to horizontally fragment data.
