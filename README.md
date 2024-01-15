@@ -107,6 +107,13 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
         ;
     };
 });
+
+...
+app.UseGraphql();
+...
+
+app.MapGraphQL<ComplexGraphqlSchema>();
+
 ```
 -   Add sitename to ClaimsIdentity.
   ```c#
