@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dino.GraphqlLib.Controllers
 {
-    public class GrapqlControllerBase : ControllerBase
+    public abstract class GrapqlControllerBase : ControllerBase
     {
         protected async Task<IActionResult> TryOk(Func<Task<IActionResult>> func)
         {

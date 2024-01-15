@@ -1,4 +1,5 @@
-﻿using Dino.GraphqlLib.Extensions.FilterWithRole;
+﻿using Antlr4.Runtime.Dfa;
+using Dino.GraphqlLib.Extensions.FilterWithRole;
 using Dino.GraphqlLib.Mutations;
 using Dino.GraphqlLib.SchemaContexts;
 using EntityGraphQL.AspNet;
@@ -78,10 +79,17 @@ namespace Dino.GraphqlLib.Infrastructures
                 }
             }
         }
+        private Action<AddGraphQLOptions<TSchemaContext>> optionExtend;
+        public GraphqlBuilder<TSchemaContext> AddOptionConfig(Action<AddGraphQLOptions<TSchemaContext>> configure)
+        {
+            optionExtend = configure;
+            return this;
+        }
         internal void Build()
         {
             _services.AddGraphQLSchema<TSchemaContext>(provider =>
             {
+                optionExtend?.Invoke(provider);
                 provider.ConfigureSchema = ConfigSchema;
             });
             _services.AddSingleton(p => p.GetService<SchemaProvider<TSchemaContext>>().AuthorizationService);

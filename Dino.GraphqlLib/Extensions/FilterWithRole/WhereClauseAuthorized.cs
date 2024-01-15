@@ -1,9 +1,11 @@
-﻿using EntityGraphQL.Schema;
+﻿using Dino.GraphqlLib.Utilities;
+using EntityGraphQL.Schema;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -36,7 +38,6 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             _logger = _serviceProvider.GetService<ILogger<WhereClauseAuthorized<TModel>>>();
             MapExpression = keyValuePairs;
         }
-
         public Expression GetExpression(Expression expression)
         {
             var visitExpres = new WhereClauseExpression(GetWhere());

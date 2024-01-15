@@ -65,8 +65,10 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         public IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IServiceProvider, IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class
         {
             var builder = new ExpressionAuthorizeCollection<TModel>();
-            config(Provider, builder);
-            Services.AddScoped<IExpressionFilter<TModel>>(builder.GetService);
+            Services.AddScoped<IExpressionFilter<TModel>>(p => {
+                config(p, builder);
+                return builder.GetService(p);
+            });
             return this;
         }
 

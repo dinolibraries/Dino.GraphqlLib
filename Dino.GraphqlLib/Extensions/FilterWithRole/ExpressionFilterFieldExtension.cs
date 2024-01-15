@@ -22,8 +22,8 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             {
                 return field.ReturnType.TypeDotnet;
             }
-
         }
+
         public override void Configure(ISchemaProvider schema, IField field)
         {
             ModelType = GetModelType(field);

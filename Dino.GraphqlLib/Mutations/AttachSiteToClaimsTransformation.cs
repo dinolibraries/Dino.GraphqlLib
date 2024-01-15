@@ -26,7 +26,6 @@ namespace Dino.GraphqlLib.Mutations
 
         public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity();
 
             var _callbackAttachSite = _serviceProvider.GetService<CallbackAttachSite>();
             var value = _callbackAttachSite?.GetSite(_httpContextAccessor.HttpContext);
@@ -34,13 +33,14 @@ namespace Dino.GraphqlLib.Mutations
             {
                 if (principal.Identity is ClaimsIdentity claimsIdentity1)
                 {
+                    ClaimsIdentity claimsIdentity = new ClaimsIdentity(claimsIdentity1);
                     foreach (var claim in value)
                     {
                         claimsIdentity.AddClaim(new Claim(claimsIdentity1.RoleClaimType, SiteHelper.GetRoleSite(claim)));
                     }
+                    principal.AddIdentity(claimsIdentity);
                 }
             }
-            principal.AddIdentity(claimsIdentity);
             return Task.FromResult(principal);
         }
     }

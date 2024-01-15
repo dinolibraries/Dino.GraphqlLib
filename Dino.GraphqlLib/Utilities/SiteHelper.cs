@@ -9,7 +9,7 @@ namespace Dino.GraphqlLib.Utilities
     public static class SiteHelper
     {
         public const string Subfix = "graphql-site";
-        public static string GetRoleSite(string claimValue)
+        public static string GetRoleSite(this string claimValue)
         {
             return $"{claimValue}-{Subfix}".ToLower();
         }
