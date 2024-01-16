@@ -12,31 +12,6 @@ using static EntityQL.Grammer.EntityQLParser;
 
 namespace Dino.GraphqlLib.ExpressionHelpers
 {
-    public class ChangeWhereClauseVisitor : ExpressionVisitor
-    {
-        public ChangeWhereClauseVisitor()
-        { }
-        public ChangeWhereClauseVisitor(Expression selectorExpres)
-        {
-            CustomerSelector = selectorExpres;
-        }
-        private Expression _SelectorExpres;
-        protected override Expression VisitMethodCall(MethodCallExpression node)
-        {
-            if (node.Method.Name == nameof(Queryable.Where))
-            {
-                _SelectorExpres = node.Arguments[1];
-            }
-            return base.VisitMethodCall(node);
-        }
-        public Expression CustomerSelector { get; set; }
-
-        [return: NotNullIfNotNull("node")]
-        public override Expression Visit(Expression node)
-        {
-            return node == _SelectorExpres ? CustomerSelector : base.Visit(node);
-        }
-    }
     public static class ModelMapperExtension
     {
         public static TExpre ReplaceWhereCondition<TExpre, TModel>(this TExpre root, Expression<Func<TModel, bool>> whereCondition)
@@ -45,9 +20,13 @@ namespace Dino.GraphqlLib.ExpressionHelpers
             var converter = new ChangeWhereClauseVisitor(whereCondition);
             return (TExpre)converter.Visit(root);
         }
-        public static Expression<Func<TSource, TTarget>> MapModelExpression<TSource, TTarget>(Expression<Func<TSource, TTarget>> expression = null)
+        public static Expression<Func<TSource, TTarget>> ModelExtendExpression<TSource, TTarget>(Expression<Func<TSource, TTarget>> expression = null)
         {
             return (Expression<Func<TSource, TTarget>>)MapModelExpressionBase(typeof(TSource), typeof(TTarget), expression);
+        }
+        public static TTarget ModelExtendCustomSelect<TSource, TTarget>(this TSource source, Expression<Func<TSource, TTarget>> expression = null) where TSource : class
+        {
+            return ModelExtendExpression(expression).Compile()(source);
         }
         public static LambdaExpression MapModelExpressionBase(Type tS, Type tT, LambdaExpression expression = null)
         {
@@ -79,7 +58,7 @@ namespace Dino.GraphqlLib.ExpressionHelpers
         }
         public static TTarget MapModelExpression<TSource, TTarget>(this TSource source, Expression<Func<TSource, TTarget>> expression = null) where TSource : class
         {
-            return MapModelExpression(expression).Compile()(source);
+            return ModelExtendExpression(expression).Compile()(source);
         }
         public static TTarget MapModelExpression<TSource, TTarget>(this TSource source, TTarget target) where TSource : class
         {
