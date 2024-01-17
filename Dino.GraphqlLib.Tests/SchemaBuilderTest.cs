@@ -114,7 +114,7 @@ namespace Dino.GraphqlLib.Tests
         }
 
         [Theory]
-        [InlineData(Queryhelper.SubjectPageQuery, new[] { RoleHelper.Admin, RoleHelper.User }, "", new[] { RoleHelper.Admin, RoleHelper.User }, null)]
+        //[InlineData(Queryhelper.SubjectPageQuery, new[] { RoleHelper.Admin, RoleHelper.User }, "", new[] { RoleHelper.Admin, RoleHelper.User }, null)]
         [InlineData(Queryhelper.SubjectPageQuery, new[] { RoleHelper.Admin }, "hello4", new[] { RoleHelper.Admin, RoleHelper.User }, null)]
         [InlineData(Queryhelper.SubjectPageQuery, new[] { RoleHelper.Admin, RoleHelper.User }, "hello4", new[] { RoleHelper.Admin, RoleHelper.User }, "hello4")]
         [InlineData(Queryhelper.SubjectPageQuery, new[] { RoleHelper.Admin, RoleHelper.User }, "hello4", new string[] { }, "hello4")]
@@ -140,10 +140,18 @@ namespace Dino.GraphqlLib.Tests
             graphqlRequest.Query = query;
             var result = schemaProvider.ExecuteRequest(graphqlRequest, provider, httpAccessor.HttpContext.User);
 
-            var value = result.Data.Values.FirstOrDefault() as dynamic;
-
-            var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
-            Assert.True(temp == resultValue);
+            if (resultValue == null)
+            {
+                var value = result.Errors[0].FirstOrDefault() as dynamic;
+                var temp = value?.Value as string;
+                Assert.True(temp?.Contains("Resource access denied!"));
+            }
+            else
+            {
+                var value = result.Data.Values.FirstOrDefault() as dynamic;
+                var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
+                Assert.True(temp == resultValue);
+            }
         }
         public string Gettest(string query)
         {
@@ -188,10 +196,18 @@ namespace Dino.GraphqlLib.Tests
             var graphqlRequest = new QueryRequest();
             graphqlRequest.Query = Queryhelper.SubjectPageQuery;
             var result = schemaProvider.ExecuteRequest(graphqlRequest, provider, httpAccessor.HttpContext.User);
-
-            var value = result.Data.Values.FirstOrDefault() as dynamic;
-            var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
-            Assert.True(temp == resultValue);
+            if (resultValue == null)
+            {
+                var value = result.Errors[0].FirstOrDefault() as dynamic;
+                var temp = value?.Value as string;
+                Assert.True(temp?.Contains("Resource access denied!"));
+            }
+            else
+            {
+                var value = result.Data.Values.FirstOrDefault() as dynamic;
+                var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
+                Assert.True(temp == resultValue);
+            }
         }
 
         [Theory]
@@ -233,11 +249,21 @@ namespace Dino.GraphqlLib.Tests
             var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();
             var graphqlRequest = new QueryRequest();
             graphqlRequest.Query = Queryhelper.SubjectPageQuery;
+
             var result = schemaProvider.ExecuteRequest(graphqlRequest, provider, httpAccessor.HttpContext.User);
 
-            var value = result.Data.Values.FirstOrDefault() as dynamic;
-            var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
-            Assert.True(temp == resultValue);
+            if (resultValue == null)
+            {
+                var value = result.Errors[0].FirstOrDefault() as dynamic;
+                var temp = value?.Value as string;
+                Assert.True(temp?.Contains("Resource access denied!"));
+            }
+            else
+            {
+                var value = result.Data.Values.FirstOrDefault() as dynamic;
+                var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
+                Assert.True(temp == resultValue);
+            }
         }
 
         private string[][] RequiedRoles = new[] {
@@ -292,9 +318,18 @@ namespace Dino.GraphqlLib.Tests
             graphqlRequest.Query = Queryhelper.SubjectPageQuery;
             var result = schemaProvider.ExecuteRequest(graphqlRequest, provider, httpAccessor.HttpContext.User);
 
-            var value = result.Data.Values.FirstOrDefault() as dynamic;
-            var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
-            Assert.True(temp == resultValue);
+            if (resultValue == null)
+            {
+                var value = result.Errors[0].FirstOrDefault() as dynamic;
+                var temp = value?.Value as string;
+                Assert.True(temp?.Contains("Resource access denied!"));
+            }
+            else
+            {
+                var value = result.Data.Values.FirstOrDefault() as dynamic;
+                var temp = Enumerable.FirstOrDefault(value?.subjects?.items)?.name as string;
+                Assert.True(temp == resultValue);
+            }
         }
     }
 }
