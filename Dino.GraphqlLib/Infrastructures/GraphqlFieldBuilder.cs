@@ -51,6 +51,11 @@ namespace Dino.GraphqlLib.Infrastructures
             var field = SchemaProvider.Type<TModel>();
             return field.AddField(newField, null);
         }
+        public FieldToResolve<TModel> ReplaceField<TModel>(string nameField)
+        {
+            var field = SchemaProvider.Type<TModel>();
+            return field.ReplaceField(nameField, null);
+        }
     }
     public class GraphqlMutationBuilder<TSchemaContext>
         where TSchemaContext : ISchemaContext
