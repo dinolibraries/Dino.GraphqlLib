@@ -6,8 +6,8 @@
 	  <PackageProjectUrl>https://github.com/dinolibraries/Dino.GraphqlLib</PackageProjectUrl>
 	  <RepositoryUrl>https://github.com/dinolibraries/Dino.GraphqlLib</RepositoryUrl>
 </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="EntityGraphQL" Version="5.1.0" />
     <PackageReference Include="EntityGraphQL.AspNet" Version="5.1.0" />
   </ItemGroup>
 

@@ -1,19 +1,10 @@
 ﻿using Dino.GraphqlLib.SchemaContexts;
-using Dino.GraphqlLib.Tests.Mutations;
 using EntityGraphQL.Schema;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualBasic;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Dino.GraphqlLib.ExpressionHelpers;
 using Microsoft.Extensions.Logging;
 using Dino.GraphqlLib.Attributes;
-using static EntityQL.Grammer.EntityQLParser;
 
 namespace Dino.GraphqlLib.Mutations
 {
@@ -25,12 +16,11 @@ namespace Dino.GraphqlLib.Mutations
         where TKey : ModelBase<TModel>.KeyBase
         where TDbSelector : IContextSelector<TSchemaContext>
     {
-        
-        private IDbContextService<TSchemaContext,TModel, TDbSelector> GetService(TSchemaContext schemaContext)
+        protected IDbContextService<TSchemaContext,TModel, TDbSelector> GetService(TSchemaContext schemaContext)
         {
             return schemaContext.Provider.GetService<IDbContextService<TSchemaContext, TModel, TDbSelector>>();
         }
-        private ILogger<TSchemaContext> GetLogger(TSchemaContext schemaContext)
+        protected ILogger<TSchemaContext> GetLogger(TSchemaContext schemaContext)
         {
             return schemaContext.Provider.GetService<ILogger<TSchemaContext>>();
         }
@@ -47,7 +37,9 @@ namespace Dino.GraphqlLib.Mutations
                 var result = await service.CreateAsync(modelMapped);
 
                 logger?.LogInformation($"Create {typeof(TModel).Name} successfullly");
-                return await service.FindWithIdAsync(result);
+                var express =  await service.FindWithIdAsync(result);
+
+                return express;
             }
             catch (Exception ex)
             {

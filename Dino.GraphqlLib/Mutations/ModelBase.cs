@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dino.GraphqlLib.Tests.Mutations
+namespace Dino.GraphqlLib.Mutations
 {
     public class ModelBase<TModel>
         where TModel : class

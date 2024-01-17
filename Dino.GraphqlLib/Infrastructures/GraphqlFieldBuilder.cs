@@ -1,6 +1,5 @@
 ﻿using Dino.GraphqlLib.Mutations;
 using Dino.GraphqlLib.SchemaContexts;
-using Dino.GraphqlLib.Tests.Mutations;
 using EntityGraphQL.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -79,7 +78,7 @@ namespace Dino.GraphqlLib.Infrastructures
         where TUpdate : ModelBase<TModel>.UpdateBase
         where TKey : ModelBase<TModel>.KeyBase
         {
-            return AddMutation< MutationCRUDDedault< TSchemaContext,TModel,TDbSelector,TCreate, TUpdate, TKey>,TModel>();
+            return AddMutation<MutationCRUDDedault<TSchemaContext,TModel,TDbSelector,TCreate, TUpdate, TKey>,TModel>();
         }
         public GraphqlMutationBuilder<TSchemaContext> AddMutation<TCRUDMutation, TModel>()
             where TCRUDMutation : IMutationCRUD<TModel>
@@ -101,6 +100,7 @@ namespace Dino.GraphqlLib.Infrastructures
             {
                 AddNonAttributedMethodsInControllers = true,
                 AutoCreateInputTypes = true,
+                AutoCreateNewComplexTypes = true,
             });
             return this;
         }

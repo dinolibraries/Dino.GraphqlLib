@@ -25,6 +25,12 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         private readonly IHttpContextAccessor _contextAccessor;
         private ILogger<WhereClauseAuthorized<TModel>> _logger;
         private readonly MapExpression<TModel> MapExpression;
+        public WhereClauseAuthorized(IGqlAuthorizationService gqlAuthorizationService,
+            IServiceProvider serviceProvider,
+            IHttpContextAccessor httpContextAccessor) : this(gqlAuthorizationService, serviceProvider, null, httpContextAccessor)
+        {
+
+        }
         public WhereClauseAuthorized(
             IGqlAuthorizationService gqlAuthorizationService,
             IServiceProvider serviceProvider,
@@ -52,15 +58,15 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
                 return x => false;
             }
 
-            var data = MapExpression.FirstOrDefault(x => _authorizationService.IsAuthorized(_contextAccessor.HttpContext.User, x.Key));
+            var data = MapExpression?.FirstOrDefault(x => _authorizationService.IsAuthorized(_contextAccessor.HttpContext.User, x.Key));
 
-            if (data.Key == null)
+            if (data?.Key == null)
             {
                 _logger?.LogWarning("No match role in maprole!");
-                return x => false;
+                throw new UnauthorizedAccessException("Resource access denied!");
             }
 
-            return data.Value;
+            return data?.Value;
         }
     }
 }

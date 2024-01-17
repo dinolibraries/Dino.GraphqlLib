@@ -63,10 +63,6 @@ namespace Dino.GraphqlLib.Mutations
 
         private BaseField AddMethodAsFieldMedthod(string name, RequiredAuthorization classLevelRequiredAuth, MethodInfo method, string description, SchemaBuilderOptions options)
         {
-            var rtest = schemaProvider.Mutation().SchemaType.GetType().GetProperty("FieldsByName",BindingFlags.NonPublic | BindingFlags.Instance);
-
-            var daya = rtest.GetValue(schemaProvider.Mutation().SchemaType, null);
-
             Debug.WriteLine($"========= {nameof(AddMethodAsFieldMedthod)} - adding {name}.");
             // Use reflection to get the private method
             var temp = (BaseField)AddMethodAsFieldMethod.Invoke(schemaProvider.Mutation(), new object[] { name, classLevelRequiredAuth, method, description, options });

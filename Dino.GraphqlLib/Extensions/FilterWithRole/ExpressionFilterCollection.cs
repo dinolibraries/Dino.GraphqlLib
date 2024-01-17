@@ -16,6 +16,7 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
     {
         IExpressionFilterCollection AddWhereClause<TWhereClause, TModel>() where TModel : class where TWhereClause : class, IExpressionFilter<TModel>;
         IExpressionFilterCollection AddWhereClause<TModel>(Func<IServiceProvider, Expression<Func<TModel, bool>>> action) where TModel : class;
+        IExpressionFilterCollection AddAuthorizeWhereClauseDefault();
         IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IServiceProvider, IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class;
         IExpressionFilterCollection AddSiteClaimTransformation<T>() where T : CallbackAttachSite;
         IExpressionFilterCollection AddSiteRoleTransformation(Func<HttpContext, IEnumerable<string>> Action);
@@ -60,18 +61,26 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             Services.AddScoped<IExpressionFilter<TModel>>(x => ActivatorUtilities.CreateInstance<ExpressionFilterDefault<TModel>>(x, action(Provider)));
             return this;
         }
-
-
         public IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IServiceProvider, IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class
         {
             var builder = new ExpressionAuthorizeCollection<TModel>();
-            Services.AddScoped<IExpressionFilter<TModel>>(p => {
+
+            Services.AddScoped<IExpressionFilter<TModel>>(p =>
+            {
                 config(p, builder);
                 return builder.GetService(p);
             });
             return this;
         }
-
+        /// <summary>
+        /// All fields without defined roles (AddRoles) will not be denied access.
+        /// </summary>
+        /// <returns></returns>
+        public IExpressionFilterCollection AddAuthorizeWhereClauseDefault()
+        {
+            Services.AddScoped(typeof(IExpressionFilter<>), typeof(WhereClauseAuthorized<>));
+            return this;
+        }
         public IExpressionFilterCollection AddSiteClaimTransformation<T>() where T : CallbackAttachSite
         {
             Services.AddTransient<IClaimsTransformation, AttachSiteToClaimsTransformation>();
@@ -79,7 +88,7 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             return this;
         }
 
-        public IExpressionFilterCollection AddSiteRoleTransformation(Func<HttpContext,IEnumerable<string>> Action)
+        public IExpressionFilterCollection AddSiteRoleTransformation(Func<HttpContext, IEnumerable<string>> Action)
         {
             Services.AddTransient<IClaimsTransformation, AttachSiteToClaimsTransformation>();
             Services.AddTransient(p => new CallbackAttachSite() { GetSite = Action });

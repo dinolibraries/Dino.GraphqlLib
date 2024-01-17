@@ -66,6 +66,5 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         {
             return AddRoles(new[] { Roles.ToList() }, expression);
         }
-
     }
 }

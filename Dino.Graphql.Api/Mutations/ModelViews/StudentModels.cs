@@ -1,5 +1,5 @@
 ﻿using Dino.Graphql.Api.DbContexts;
-using Dino.GraphqlLib.Tests.Mutations;
+using Dino.GraphqlLib.Mutations;
 
 namespace Dino.Graphql.Api.Mutations.ModelViews
 {

@@ -85,8 +85,24 @@ namespace Dino.GraphqlLib.Infrastructures
             optionExtend = configure;
             return this;
         }
+
+        private void ValidateSchemaContext()
+        {
+            var typeProps = GetDbContexType().SelectMany(x => x.GetProperties().Where(x => IsDbSet(x.PropertyType)));
+
+            var type = typeProps.GroupBy(x => x.PropertyType).FirstOrDefault(x => x.Count() > 1);
+
+            if (type != null)
+            {
+                throw new InvalidDataException($"SchemaContext has {type.Key} is duplicate!");
+            }
+
+        }
+
         internal void Build()
         {
+            ValidateSchemaContext();
+
             _services.AddGraphQLSchema<TSchemaContext>(provider =>
             {
                 optionExtend?.Invoke(provider);
