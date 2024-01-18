@@ -73,7 +73,7 @@ namespace Dino.GraphqlLib.Mutations
             }
         }
         [MutationField]
-        public override async Task<object> DeleteAsync(TSchemaContext context, [GraphQLArguments] TKey key)
+        public override async Task<TModel> DeleteAsync(TSchemaContext context, [GraphQLArguments] TKey key)
         {
             var logger = GetLogger(context);
             try
@@ -86,7 +86,7 @@ namespace Dino.GraphqlLib.Mutations
                 var result = await service.DeleteAsync(model);
 
                 logger?.LogInformation($"Update {typeof(TModel).Name} successfullly");
-                return result;
+                return result ;
             }
             catch (Exception ex)
             {
