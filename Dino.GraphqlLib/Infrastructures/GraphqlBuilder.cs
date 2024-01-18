@@ -74,9 +74,9 @@ namespace Dino.GraphqlLib.Infrastructures
                 {
                     field
                    .UseExpressionFilter()
+                   .UseSort()
                    .UseFilter()
-                   .UseOffsetPaging()
-                   .UseSort();
+                   .UseOffsetPaging();
                 }
             }
         }
