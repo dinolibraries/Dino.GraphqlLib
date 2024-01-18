@@ -28,7 +28,7 @@ namespace Dino.Graphql.Api.Mutations
             await DbContext.SaveChangesAsync();
             return result.Entity;
         }
-        public async Task<object> DeleteAsync(TModel model)
+        public async Task<TModel> DeleteAsync(TModel model)
         {
             var result = DbContext.Remove(model);
             await DbContext.SaveChangesAsync();
