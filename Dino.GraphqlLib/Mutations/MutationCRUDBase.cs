@@ -22,6 +22,6 @@ namespace Dino.GraphqlLib.Mutations
     {
         public abstract Task<Expression<Func<TSchemaContext, TModel>>> CreateAsync(TSchemaContext context, [GraphQLArguments] TCreate entity);
         public abstract Task<Expression<Func<TSchemaContext, TModel>>> UpdateAsync(TSchemaContext context, [GraphQLArguments] TKey key, [GraphQLArguments] TUpdate entity);
-        public abstract Task<object> DeleteAsync(TSchemaContext context, [GraphQLArguments] TKey key);
+        public abstract Task<TModel> DeleteAsync(TSchemaContext context, [GraphQLArguments] TKey key);
     }
 }

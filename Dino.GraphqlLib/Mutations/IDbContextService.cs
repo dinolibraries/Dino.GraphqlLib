@@ -15,7 +15,7 @@ namespace Dino.GraphqlLib.Mutations
     {
         Task<TModel> CreateAsync(TModel model);
         Task<TModel> UpdateAsync(TModel model);
-        Task<object> DeleteAsync(TModel model);
+        Task<TModel> DeleteAsync(TModel model);
         Task<TModel> FindAsync<Tkey>(Tkey key);
         //Expression<Func<TSource, bool>> BuildExpressionFindById<TSource>(TSource source);
         //Expression<Func<TSource, bool>> BuildExpressionFindByIdWith<TSource, Tkey>(Tkey valueObject);
