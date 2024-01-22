@@ -58,7 +58,7 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         public IExpressionFilterCollection AddWhereClause<TModel>(Func<IServiceProvider, Expression<Func<TModel, bool>>> action)
            where TModel : class
         {
-            Services.AddScoped<IExpressionFilter<TModel>>(x => ActivatorUtilities.CreateInstance<ExpressionFilterDefault<TModel>>(x, action(Provider)));
+            Services.AddScoped<IExpressionFilter<TModel>>(x => ActivatorUtilities.CreateInstance<ExpressionFilterDefault<TModel>>(x, action(RootProvider)));
             return this;
         }
         public IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IServiceProvider, IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class
@@ -97,16 +97,19 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
 
 
         //Provider
-        public IServiceProvider Provider { get; set; }
+        public IServiceProvider RootProvider { get; set; }
         public void SetupProvider(IServiceProvider serviceProvider)
         {
-            Provider = serviceProvider;
+            RootProvider = serviceProvider;
         }
-
+        public IServiceProvider GetHttpContextProvider()
+        {
+            return RootProvider.GetService<IHttpContextAccessor>()?.HttpContext?.RequestServices;
+        }
         public Expression GetExpression<TModel>(Expression expression)
             where TModel : class
         {
-            var expressionFilter = Provider.GetService<IExpressionFilter<TModel>>();
+            var expressionFilter = GetHttpContextProvider().GetService<IExpressionFilter<TModel>>();
             return expressionFilter?.GetExpression(expression);
         }
         public Expression GetExpression(Type type, Expression expression)

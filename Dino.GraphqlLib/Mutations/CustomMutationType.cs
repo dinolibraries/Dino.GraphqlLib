@@ -68,6 +68,6 @@ namespace Dino.GraphqlLib.Mutations
             var temp = (BaseField)AddMethodAsFieldMethod.Invoke(schemaProvider.Mutation(), new object[] { name, classLevelRequiredAuth, method, description, options });
             return temp;
         }
-        
+
     }
 }

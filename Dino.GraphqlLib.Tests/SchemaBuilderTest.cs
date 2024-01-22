@@ -46,6 +46,19 @@ namespace Dino.GraphqlLib.Tests
             InitialDbContext(provider);
             return provider;
         }
+        private IServiceProvider SetupSercvice()
+        {
+            ExpressionFilterCollection.Clear();
+            var services = ServiceHelper.GetServiceCollection();
+            ExpressionFilterCollection.Instance.SetupService(services);
+
+            services.AddHttpContextAccessor();
+
+            var provider = services.BuildServiceProvider();
+            ExpressionFilterCollection.Instance.SetupProvider(provider);
+            InitialDbContext(provider);
+            return provider;
+        }
         private void InitialDbContext(IServiceProvider provider)
         {
             var _context1 = provider.GetService<Graph1DbContext>();
@@ -89,7 +102,10 @@ namespace Dino.GraphqlLib.Tests
         [InlineData(Queryhelper.SubjectPageQuery)]
         public void FieldExtension(string query)
         {
-            var provider = SetupSercvice(new ServiceOption { });
+            var provider = SetupSercvice();
+            var httpAccessor = provider.GetService<IHttpContextAccessor>();
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption { });
+
             var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();
             var graphqlRequest = new QueryRequest();
             graphqlRequest.Query = query;
@@ -102,9 +118,9 @@ namespace Dino.GraphqlLib.Tests
         [InlineData(Queryhelper.SubjectPageQuery)]
         public void HttpContextAuthorized(string query)
         {
-            var provider = SetupSercvice(new ServiceOption { });
+            var provider = SetupSercvice();
             var httpAccessor = provider.GetService<IHttpContextAccessor>();
-            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(new ServiceHelper.HttpContextOption { });
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption { });
 
             var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();
             var graphqlRequest = new QueryRequest();
@@ -131,7 +147,7 @@ namespace Dino.GraphqlLib.Tests
                 Roles = requiredRoles
             });
             var httpAccessor = provider.GetService<IHttpContextAccessor>();
-            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(new ServiceHelper.HttpContextOption
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption
             {
                 Roles = roles
             });
@@ -187,7 +203,7 @@ namespace Dino.GraphqlLib.Tests
             InitialDbContext(provider);
 
             var httpAccessor = provider.GetService<IHttpContextAccessor>();
-            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(new ServiceHelper.HttpContextOption
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption
             {
                 Roles = roles
             });
@@ -240,7 +256,7 @@ namespace Dino.GraphqlLib.Tests
             InitialDbContext(provider);
 
             var httpAccessor = provider.GetService<IHttpContextAccessor>();
-            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(new ServiceHelper.HttpContextOption
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption
             {
                 Roles = roles,
                 Site = Site,
@@ -307,7 +323,7 @@ namespace Dino.GraphqlLib.Tests
             InitialDbContext(provider);
 
             var httpAccessor = provider.GetService<IHttpContextAccessor>();
-            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(new ServiceHelper.HttpContextOption
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption
             {
                 Roles = roles,
                 Site = Site,

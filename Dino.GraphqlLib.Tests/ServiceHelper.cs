@@ -84,9 +84,9 @@ namespace Dino.GraphqlLib.Tests
             public string[] Roles { get; set; }
             public string Site { get; set; }
         }
-        public static HttpContext GetHttpContext(HttpContextOption httpContextOption)
+        public static HttpContext GetHttpContext(IServiceProvider serviceProvider,HttpContextOption httpContextOption)
         {
-            var httpcontext = new DefaultHttpContext();
+            var httpcontext = new DefaultHttpContext() { RequestServices = serviceProvider };
 
             // User is logged in
             httpcontext.User = new GenericPrincipal(
