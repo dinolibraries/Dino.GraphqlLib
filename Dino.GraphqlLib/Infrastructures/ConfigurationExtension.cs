@@ -52,7 +52,7 @@ namespace Dino.GraphqlLib.Infrastructures
         }
         public static IApplicationBuilder UseGraphql(this IApplicationBuilder services)
         {
-            ExpressionFilterCollection.Instance.SetupProvider(services.ApplicationServices.CreateScope().ServiceProvider);
+            services.ApplicationServices.UseGraphql();
             return services;
         }
 
