@@ -1,6 +1,7 @@
 ﻿using Dino.Graphql.Api;
 using Dino.Graphql.Api.DbContexts;
 using Dino.GraphqlLib.Extensions.FilterWithRole;
+using Dino.GraphqlLib.Infrastructures;
 using EntityGraphQL.AspNet;
 using EntityGraphQL.Schema;
 using EntityGraphQL.Schema.FieldExtensions;
@@ -41,42 +42,23 @@ namespace Dino.GraphqlLib.Tests
 
             return services;
         }
-        public static IServiceCollection GetServiceCollection()
+        public const string GraphqlSiteHeaderKey = "graphql-site";
+        public static string GetGraphqlSite(this HttpContext httpContext)
+        {
+            return httpContext.Request.Headers.TryGetValue(GraphqlSiteHeaderKey, out var value) ? value.ToString() : null;
+        }
+        public static IServiceCollection GetServiceCollection(Action<GraphqlBuilder<ComplexGraphqlSchema>> action)
         {
             var services = new ServiceCollection();
-
+            services.AddHttpContextAccessor();
+            services.AddLogging();
             services.AddScoped<ComplexGraphqlSchema>();
             services.AddDbContext<Graph1DbContext>(opt => opt.UseInMemoryDatabase("Demo1"));
             services.AddDbContext<Graph2DbContext>(opt => opt.UseInMemoryDatabase("Demo2"));
-            services.AddGraphQLSchema<ComplexGraphqlSchema>(provider =>
+            services.AddGraphql<ComplexGraphqlSchema>(builder =>
             {
-                provider.ConfigureSchema = (option) =>
-                {
-                    var fields = option.Type<Graph1DbContext>()
-                    .GetFields()
-                    .Union(option.Type<Graph2DbContext>().GetFields()).ToList();
-
-                    var filedDbset = fields.Where(x => IsDbSet(x.ReturnType.TypeDotnet)).ToList();
-                    foreach (var field in filedDbset)
-                    {
-                        field
-                        .AddExtension(new ExpressionFilterFieldExtension())
-                        .UseFilter()
-                        .UseOffsetPaging();
-                    }
-
-                    var fieldClass = fields.Where(x => IsClass(x.ReturnType.TypeDotnet)).ToList();
-                    foreach (var field in fieldClass)
-                    {
-                        field
-                        .AddExtension(new ExpressionFilterFieldExtension())
-                        ;
-                    }
-
-                    var test = option.ToGraphQLSchemaString();
-                };
+                action(builder);
             });
-            services.AddSingleton(p => p.GetService<SchemaProvider<ComplexGraphqlSchema>>().AuthorizationService);
             return services;
         }
         public class HttpContextOption

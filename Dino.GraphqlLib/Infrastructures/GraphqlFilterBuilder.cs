@@ -1,4 +1,5 @@
-﻿using Dino.GraphqlLib.Mutations;
+﻿using Dino.GraphqlLib.Extensions.FilterWithRole;
+using Dino.GraphqlLib.Mutations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,37 +11,26 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Dino.GraphqlLib.Extensions.FilterWithRole
+namespace Dino.GraphqlLib.Infrastructures
 {
     public interface IExpressionFilterCollection
     {
         IExpressionFilterCollection AddWhereClause<TWhereClause, TModel>() where TModel : class where TWhereClause : class, IExpressionFilter<TModel>;
         IExpressionFilterCollection AddWhereClause<TModel>(Func<IServiceProvider, Expression<Func<TModel, bool>>> action) where TModel : class;
         IExpressionFilterCollection AddAuthorizeWhereClauseDefault();
-        IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IServiceProvider, IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class;
+        IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class;
         IExpressionFilterCollection AddSiteClaimTransformation<T>() where T : CallbackAttachSite;
         IExpressionFilterCollection AddSiteRoleTransformation(Func<HttpContext, IEnumerable<string>> Action);
     }
 
-    public class ExpressionFilterCollection : IExpressionFilterCollection
+    public class GraphqlFilterBuilder : IExpressionFilterCollection
     {
-        public ExpressionFilterCollection()
+        public GraphqlFilterBuilder(IServiceCollection serviceDescriptors)
         {
-            _instance = this;
-        }
-        private static ExpressionFilterCollection _instance;
-        public static ExpressionFilterCollection Instance { get => _instance == null ? new ExpressionFilterCollection() : _instance; }
-        public static void Clear()
-        {
-            _instance = null;
+            Services = serviceDescriptors;
         }
         //Service
-
         public IServiceCollection Services { get; set; }
-        public void SetupService(IServiceCollection services)
-        {
-            Services = services;
-        }
 
         public IExpressionFilterCollection AddWhereClause<TWhereClause, TModel>()
            where TModel : class
@@ -58,16 +48,16 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         public IExpressionFilterCollection AddWhereClause<TModel>(Func<IServiceProvider, Expression<Func<TModel, bool>>> action)
            where TModel : class
         {
-            Services.AddScoped<IExpressionFilter<TModel>>(x => ActivatorUtilities.CreateInstance<ExpressionFilterDefault<TModel>>(x, action(RootProvider)));
+            Services.AddScoped<IExpressionFilter<TModel>>(x => ActivatorUtilities.CreateInstance<ExpressionFilterDefault<TModel>>(x, action(x)));
             return this;
         }
-        public IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IServiceProvider, IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class
+        public IExpressionFilterCollection AddAuthorizeWhereClause<TModel>(Action<IWhereClauseAuthorizeCollection<TModel>> config) where TModel : class
         {
             var builder = new ExpressionAuthorizeCollection<TModel>();
 
             Services.AddScoped<IExpressionFilter<TModel>>(p =>
             {
-                config(p, builder);
+                config(builder);
                 return builder.GetService(p);
             });
             return this;
@@ -94,26 +84,6 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             Services.AddTransient(p => new CallbackAttachSite() { GetSite = Action });
             return this;
         }
-        //Provider
-        public IServiceProvider RootProvider { get; set; }
-        public void SetupProvider(IServiceProvider serviceProvider)
-        {
-            RootProvider = serviceProvider;
-        }
-        public Expression GetExpression<TModel>(Expression expression)
-            where TModel : class
-        {
-            var expressionFilter = RootProvider.GetService<IExpressionFilter<TModel>>();
-            return expressionFilter?.GetExpression(expression);
-        }
-        public Expression GetExpression(Type type, Expression expression)
-        {
-            var method = GetType().GetMethod(nameof(GetExpression), 1, new Type[] { typeof(Expression) }).MakeGenericMethod(type);
-
-            return method.Invoke(this, new[] { expression }) as Expression;
-        }
-
-
     }
 
 }

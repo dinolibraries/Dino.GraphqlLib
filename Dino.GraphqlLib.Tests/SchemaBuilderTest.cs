@@ -13,6 +13,7 @@ using System.Data;
 using Dino.GraphqlLib.Utilities;
 using System.Linq.Expressions;
 using Dino.Graphql.Api.ExpressionHelpers;
+using static Dino.GraphqlLib.Tests.SchemaBuilderTest;
 namespace Dino.GraphqlLib.Tests
 {
     public class SchemaBuilderTest
@@ -28,34 +29,41 @@ namespace Dino.GraphqlLib.Tests
         }
         private IServiceProvider SetupSercvice(ServiceOption serviceOption)
         {
-            ExpressionFilterCollection.Clear();
-            var services = ServiceHelper.GetServiceCollection();
-            ExpressionFilterCollection.Instance.SetupService(services);
 
-            ExpressionFilterCollection.Instance
-              .AddAuthorizeWhereClause<Subject>((provider, option) =>
-              {
-                  option.AddRoles(requird => requird.RequiresAllRoles(serviceOption.Roles), x => x.Name == serviceOption.Name);
-                  option.AddRoles(requird => requird.RequiresAllRoles(RoleHelper.Manage), x => x.Name == serviceOption.Name);
-              });
+            var services = ServiceHelper.GetServiceCollection(builder =>
+            {
+                builder
+                .AddFilterExpression<DbContext>()
+                .AddSiteRoleTransformation(context =>
+                 {
+                     return new[] { context.GetGraphqlSite() };
+                 })
+                .AddAuthorizeWhereClause<Subject>((option) =>
+                {
+                    option.AddRoles(requird => requird.RequiresAllRoles(serviceOption.Roles), p => x => x.Name == serviceOption.Name);
+                    option.AddRoles(requird => requird.RequiresAllRoles(RoleHelper.Manage), p => x => x.Name == serviceOption.Name);
+                });
+            });
 
-            services.AddHttpContextAccessor();
 
             var provider = services.BuildServiceProvider();
-            ExpressionFilterCollection.Instance.SetupProvider(provider);
             InitialDbContext(provider);
             return provider;
         }
         private IServiceProvider SetupSercvice()
         {
-            ExpressionFilterCollection.Clear();
-            var services = ServiceHelper.GetServiceCollection();
-            ExpressionFilterCollection.Instance.SetupService(services);
+            var services = ServiceHelper.GetServiceCollection(builder =>
+            {
+
+                builder
+                .AddFilterExpression<DbContext>()
+                ;
+
+            });
 
             services.AddHttpContextAccessor();
 
             var provider = services.BuildServiceProvider();
-            ExpressionFilterCollection.Instance.SetupProvider(provider);
             InitialDbContext(provider);
             return provider;
         }
@@ -187,18 +195,17 @@ namespace Dino.GraphqlLib.Tests
             services.AddGraphql<ComplexGraphqlSchema>(builder =>
             {
                 builder.AddFilterExpression<DbContext>()
-                .AddAuthorizeWhereClause<Subject>((p, opt) =>
+                .AddAuthorizeWhereClause<Subject>((opt) =>
                 {
                     for (int i = 0; i < releRequireds.Length; i++)
                     {
                         var value = condition[i];
-                        opt.AddRoles(new string[] { releRequireds[i] }, x => x.Name == value);
+                        opt.AddRoles(new string[] { releRequireds[i] }, p => x => x.Name == value);
                     }
                 });
             });
 
             var provider = services.BuildServiceProvider();
-            provider.UseGraphql();
 
             InitialDbContext(provider);
 
@@ -243,15 +250,14 @@ namespace Dino.GraphqlLib.Tests
                 {
                     return new[] { Site };
                 })
-                .AddAuthorizeWhereClause<Subject>((p, opt) =>
+                .AddAuthorizeWhereClause<Subject>((opt) =>
                 {
                     var value = condition;
-                    opt.AddRoles(roles => roles.RequiresAllRoles(releRequireds), x => x.Name == value);
+                    opt.AddRoles(roles => roles.RequiresAllRoles(releRequireds), p => x => x.Name == value);
                 });
             });
 
             var provider = services.BuildServiceProvider();
-            provider.UseGraphql();
 
             InitialDbContext(provider);
 
@@ -307,18 +313,17 @@ namespace Dino.GraphqlLib.Tests
                 {
                     return new[] { Site };
                 })
-                .AddAuthorizeWhereClause<Subject>((p, opt) =>
+                .AddAuthorizeWhereClause<Subject>((opt) =>
                 {
                     foreach (var role in RequiedRoles)
                     {
                         var value = role[0];
-                        opt.AddRoles(roles => roles.RequiresAllRoles(role.Skip(1).ToArray()), x => x.Name == value);
+                        opt.AddRoles(roles => roles.RequiresAllRoles(role.Skip(1).ToArray()), p => x => x.Name == value);
                     }
                 });
             });
 
             var provider = services.BuildServiceProvider();
-            provider.UseGraphql();
 
             InitialDbContext(provider);
 

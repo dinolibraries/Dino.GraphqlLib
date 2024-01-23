@@ -1,4 +1,5 @@
 ﻿using Dino.GraphqlLib.Attributes;
+using Dino.GraphqlLib.Extensions;
 using EntityGraphQL.Schema;
 using Nullability;
 using System;
@@ -14,17 +15,18 @@ using System.Threading.Tasks;
 
 namespace Dino.GraphqlLib.Mutations
 {
-    public class CustomMutationType
+    public class CustomMutationType : MutationType
     {
         public readonly ISchemaProvider schemaProvider;
         private readonly MethodInfo AddMethodAsFieldMethod;
-        private readonly SchemaType SchemaType;
+        //private readonly SchemaType SchemaType;
 
-        public CustomMutationType(ISchemaProvider schema)
+        public CustomMutationType(ISchemaProvider schema, string name, string description, RequiredAuthorization requiredAuthorization) : base(schema, name, description, requiredAuthorization)
         {
             schemaProvider = schema;
             AddMethodAsFieldMethod = typeof(ControllerType).GetMethod("AddMethodAsField", BindingFlags.NonPublic | BindingFlags.Instance);
         }
+  
         public RequiredAuthorization AuthorizationMutaionDefault { get; set; }
 
         public ControllerType AddFromModel(string rootName, Type type, SchemaBuilderOptions options = null)
@@ -55,7 +57,6 @@ namespace Dino.GraphqlLib.Mutations
                 {
                     string name = schemaProvider.SchemaFieldNamer(Regex.Replace(methodInfo.Name, "[Aa][Ss][Yy][nN][Cc]", ""));
                     AddMethodAsFieldMedthod($"{rootName}_{name}", requiredAuthFromType, methodInfo, graphQLMethodAttribute?.Description ?? "", options);
-
                 }
             }
             return schemaProvider.Mutation();
@@ -67,6 +68,12 @@ namespace Dino.GraphqlLib.Mutations
             // Use reflection to get the private method
             var temp = (BaseField)AddMethodAsFieldMethod.Invoke(schemaProvider.Mutation(), new object[] { name, classLevelRequiredAuth, method, description, options });
             return temp;
+        }
+
+        protected override BaseField MakeField(string name, MethodInfo method, string description, SchemaBuilderOptions options, bool isAsync, RequiredAuthorization requiredClaims, GqlTypeInfo returnType)
+        {
+            options ??= new SchemaBuilderOptions();
+            return new CustomMutationField(SchemaType.Schema, SchemaType, name, returnType, method, description ?? string.Empty, requiredClaims, isAsync, options);
         }
 
     }

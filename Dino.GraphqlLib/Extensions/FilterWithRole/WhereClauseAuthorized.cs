@@ -1,4 +1,5 @@
-﻿using Dino.GraphqlLib.Utilities;
+﻿using Dino.GraphqlLib.Authorizations;
+using Dino.GraphqlLib.Utilities;
 using EntityGraphQL.Schema;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,26 +14,26 @@ using System.Threading.Tasks;
 
 namespace Dino.GraphqlLib.Extensions.FilterWithRole
 {
-    public class MapExpression<TModel> : Dictionary<RequiredAuthorization, Expression<Func<TModel, bool>>>
+    public class MapExpression<TModel> : Dictionary<RequiredAuthorization,Func<IServiceProvider,Expression<Func<TModel, bool>>>>
     {
 
     }
     public class WhereClauseAuthorized<TModel> : IExpressionFilter<TModel>
         where TModel : class
     {
-        private readonly IGqlAuthorizationService _authorizationService;
+        private readonly AuthorizationServiceBase _authorizationService;
         private readonly IServiceProvider _serviceProvider;
         private readonly IHttpContextAccessor _contextAccessor;
         private ILogger<WhereClauseAuthorized<TModel>> _logger;
         private readonly MapExpression<TModel> MapExpression;
-        public WhereClauseAuthorized(IGqlAuthorizationService gqlAuthorizationService,
+        public WhereClauseAuthorized(AuthorizationServiceBase gqlAuthorizationService,
             IServiceProvider serviceProvider,
             IHttpContextAccessor httpContextAccessor) : this(gqlAuthorizationService, serviceProvider, null, httpContextAccessor)
         {
 
         }
         public WhereClauseAuthorized(
-            IGqlAuthorizationService gqlAuthorizationService,
+            AuthorizationServiceBase gqlAuthorizationService,
             IServiceProvider serviceProvider,
             MapExpression<TModel> keyValuePairs,
             IHttpContextAccessor httpContextAccessor
@@ -65,7 +66,7 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
                 _logger?.LogWarning("No match role in maprole!");
                 throw new UnauthorizedAccessException("Resource access denied!");
             }
-            return (Expression<Func<TModel, bool>>)(data?.Value?.CloneExpression());
+            return data?.Value?.Invoke(_serviceProvider);
         }
     }
 
