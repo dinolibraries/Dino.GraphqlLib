@@ -1,5 +1,4 @@
 ﻿using Antlr4.Runtime.Dfa;
-using Dino.GraphqlLib.Extensions.FilterWithRole;
 using Dino.GraphqlLib.Mutations;
 using Dino.GraphqlLib.SchemaContexts;
 using EntityGraphQL.AspNet;
@@ -10,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,7 +22,6 @@ namespace Dino.GraphqlLib.Infrastructures
         public GraphqlBuilder(IServiceCollection services)
         {
             _services = services;
-            ExpressionFilterCollection.Instance.SetupService(_services);
         }
 
         public IExpressionFilterCollection AddFilterExpression<TDbContext>()
@@ -33,9 +32,11 @@ namespace Dino.GraphqlLib.Infrastructures
         {
             AddDbContextType(DbContextType);
             if (DbContexType == null) throw new Exception(nameof(DbContexType) + " can not null!");
-            return ExpressionFilterCollection.Instance;
+            return new GraphqlFilterBuilder(_services);
         }
         public Action<GraphqlFieldBuilder<TSchemaContext>> FieldBuilder { get; set; }
+        public Action<GraphqlMutationBuilder<TSchemaContext>> MutationBuilder { get; set; }
+     
         private Type DbContexType { get; set; }
         public GraphqlBuilder<TSchemaContext> AddDbContextType(Type type)
         {
@@ -86,7 +87,6 @@ namespace Dino.GraphqlLib.Infrastructures
             optionExtend = configure;
             return this;
         }
-
         private void ValidateSchemaContext()
         {
             var typeProps = GetDbContexType().SelectMany(x => x.GetProperties().Where(x => IsDbSet(x.PropertyType)));
@@ -99,7 +99,6 @@ namespace Dino.GraphqlLib.Infrastructures
             }
 
         }
-
         internal void Build()
         {
             ValidateSchemaContext();
@@ -109,7 +108,6 @@ namespace Dino.GraphqlLib.Infrastructures
                 optionExtend?.Invoke(provider);
                 provider.ConfigureSchema = ConfigSchema;
             });
-            _services.AddSingleton(p => p.GetService<SchemaProvider<TSchemaContext>>().AuthorizationService);
         }
     }
 }

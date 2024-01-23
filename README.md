@@ -91,12 +91,12 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
     })
     .AddWhereClause<Student>(p => x => x.Name.Contains("hello1"))
     .AddWhereClause<Teacher>(p => x => x.Name.Contains("hello3"))
-    .AddAuthorizeWhereClause<Subject>((p, opt) =>
+    .AddWhereClause<Student>(p => x => x.Name.Contains("hello1"))
+    .AddAuthorizeWhereClause<Subject>((opt) =>
     {
-        opt.AddRoles(x => x.RequiresAllRoles("Admin", SiteHelper.GetRoleSite("ADMINSITE")), x => x.Name == "hello2");
-        opt.AddRoles(new string[] { "User", SiteHelper.GetRoleSite("ADMINSITE") }, x => x.Name == "hello1");
+        opt.AddRoles(x => x.RequiresAllRoles("Admin", SiteHelper.GetRoleSite("ADMINSITE")), p => x => x.Name == "hello2");
+        opt.AddRoles(new string[] { "User", SiteHelper.GetRoleSite("ADMINSITE") }, p => x => x.Name == "hello1");
     });
-
     // Mutation config
     builder.FieldBuilder = b =>
     {

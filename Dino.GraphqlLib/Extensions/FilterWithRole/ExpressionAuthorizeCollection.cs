@@ -19,16 +19,16 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         /// <param name="Roles"></param>
         /// <param name="expression"></param>
         /// <returns></returns>
-        IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<List<string>> Roles, Expression<Func<TModel, bool>> expression);
+        IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<List<string>> Roles, Func<IServiceProvider, Expression<Func<TModel, bool>>> expression);
         /// <summary>
         /// Any roles
         /// </summary>
         /// <param name="Roles"></param>
         /// <param name="expression"></param>
         /// <returns></returns>
-        IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<string> Roles, Expression<Func<TModel, bool>> expression);
-        IWhereClauseAuthorizeCollection<TModel> AddRoles(Action<RequiredAuthorization> action, Expression<Func<TModel, bool>> expression);
-        IWhereClauseAuthorizeCollection<TModel> AddRoles(RequiredAuthorization requiredAuthorization, Expression<Func<TModel, bool>> expression);
+        IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<string> Roles, Func<IServiceProvider, Expression<Func<TModel, bool>>> expression);
+        IWhereClauseAuthorizeCollection<TModel> AddRoles(Action<RequiredAuthorization> action, Func<IServiceProvider, Expression<Func<TModel, bool>>> expression);
+        IWhereClauseAuthorizeCollection<TModel> AddRoles(RequiredAuthorization requiredAuthorization, Func<IServiceProvider, Expression<Func<TModel, bool>>> expression);
     }
     public class ExpressionAuthorizeCollection<TModel> : IWhereClauseAuthorizeCollection<TModel>
         where TModel : class
@@ -40,7 +40,7 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
 
         private readonly MapExpression<TModel> MapExpression;
 
-        public IWhereClauseAuthorizeCollection<TModel> AddRoles(RequiredAuthorization requiredAuthorization, Expression<Func<TModel, bool>> expression)
+        public IWhereClauseAuthorizeCollection<TModel> AddRoles(RequiredAuthorization requiredAuthorization, Func<IServiceProvider, Expression<Func<TModel, bool>>> expression)
         {
             MapExpression.Add(requiredAuthorization, expression);
             return this;
@@ -50,19 +50,19 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             var instance = ActivatorUtilities.CreateInstance<WhereClauseAuthorized<TModel>>(serviceProvider, MapExpression);
             return instance;
         }
-        public IWhereClauseAuthorizeCollection<TModel> AddRoles(Action<RequiredAuthorization> action, Expression<Func<TModel, bool>> expression)
+        public IWhereClauseAuthorizeCollection<TModel> AddRoles(Action<RequiredAuthorization> action, Func<IServiceProvider, Expression<Func<TModel, bool>>> expression)
         {
             var requirdAuth = new RequiredAuthorization();
             action(requirdAuth);
             MapExpression.Add(requirdAuth, expression);
             return this;
         }
-        public IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<List<string>> roles, Expression<Func<TModel, bool>> expression)
+        public IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<List<string>> roles, Func<IServiceProvider, Expression<Func<TModel, bool>>> expression)
         {
             MapExpression.Add(new RequiredAuthorization(roles, null), expression);
             return this;
         }
-        public IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<string> Roles, Expression<Func<TModel, bool>> expression)
+        public IWhereClauseAuthorizeCollection<TModel> AddRoles(IEnumerable<string> Roles, Func<IServiceProvider, Expression<Func<TModel, bool>>> expression)
         {
             return AddRoles(new[] { Roles.ToList() }, expression);
         }

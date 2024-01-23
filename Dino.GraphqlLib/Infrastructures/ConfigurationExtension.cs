@@ -1,5 +1,7 @@
-﻿using Dino.GraphqlLib.Extensions.FilterWithRole;
+﻿using Dino.GraphqlLib.Authorizations;
+using Dino.GraphqlLib.Extensions.FilterWithRole;
 using Dino.GraphqlLib.SchemaContexts;
+using Dino.GraphqlLib.SchemaProviders;
 using EntityGraphQL.AspNet;
 using EntityGraphQL.Schema;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,23 +27,30 @@ namespace Dino.GraphqlLib.Infrastructures
         {
             serviceCollection.TryAddSingleton((IGraphQLRequestDeserializer)new DefaultGraphQLRequestDeserializer());
             serviceCollection.TryAddSingleton((IGraphQLResponseSerializer)new DefaultGraphQLResponseSerializer());
-            ServiceProvider provider = serviceCollection.BuildServiceProvider();
-            IAuthorizationService service = provider.GetService<IAuthorizationService>();
-            IWebHostEnvironment service2 = provider.GetService<IWebHostEnvironment>();
-            ILogger<SchemaProvider<TSchemaContext>> logger = provider.GetService<ILogger<SchemaProvider<TSchemaContext>>>();
+            serviceCollection.TryAddSingleton<PolicyOrRoleBasedAuthorization>();
+            serviceCollection.TryAddSingleton<AuthorizationServiceBase>();
+
+            var provider = serviceCollection.BuildServiceProvider();
+
             AddGraphQLOptions<TSchemaContext> addGraphQLOptions = new AddGraphQLOptions<TSchemaContext>();
+
             configure(addGraphQLOptions);
-            SchemaProvider<TSchemaContext> schemaProvider = new SchemaProvider<TSchemaContext>(new PolicyOrRoleBasedAuthorization(service), addGraphQLOptions.FieldNamer, logger, introspectionEnabled: true, service2?.IsEnvironment("Development") ?? true);
-            addGraphQLOptions.PreBuildSchemaFromContext?.Invoke(schemaProvider);
+
+            var schema = ActivatorUtilities.CreateInstance<CustomSchemaProvider<TSchemaContext>>(provider, addGraphQLOptions.FieldNamer, provider.GetService<IWebHostEnvironment>()?.IsDevelopment() ?? true);
+            addGraphQLOptions.PreBuildSchemaFromContext?.Invoke(schema);
+
             if (addGraphQLOptions.AutoBuildSchemaFromContext)
             {
-                schemaProvider.PopulateFromContext(addGraphQLOptions);
+                schema.PopulateFromContext(addGraphQLOptions);
             }
 
-            addGraphQLOptions.ConfigureSchema?.Invoke(schemaProvider);
-            serviceCollection.AddSingleton(schemaProvider);
+            addGraphQLOptions.ConfigureSchema?.Invoke(schema);
+
+            serviceCollection.TryAddSingleton<SchemaProvider<TSchemaContext>>(schema);
+
             return serviceCollection;
         }
+
         public static IServiceCollection AddGraphql<TSchemaContext>(this IServiceCollection services, Action<GraphqlBuilder<TSchemaContext>> action)
             where TSchemaContext : class, ISchemaContext
         {
@@ -49,17 +59,6 @@ namespace Dino.GraphqlLib.Infrastructures
             action(builder);
             builder.Build();
             return services;
-        }
-        public static IApplicationBuilder UseGraphql(this IApplicationBuilder services)
-        {
-            services.ApplicationServices.UseGraphql();
-            return services;
-        }
-
-        public static IServiceProvider UseGraphql(this IServiceProvider provider)
-        {
-            ExpressionFilterCollection.Instance.SetupProvider(provider);
-            return provider;
         }
     }
 }
