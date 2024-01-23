@@ -94,22 +94,16 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             Services.AddTransient(p => new CallbackAttachSite() { GetSite = Action });
             return this;
         }
-
-
         //Provider
         public IServiceProvider RootProvider { get; set; }
         public void SetupProvider(IServiceProvider serviceProvider)
         {
             RootProvider = serviceProvider;
         }
-        public IServiceProvider GetHttpContextProvider()
-        {
-            return RootProvider.GetService<IHttpContextAccessor>()?.HttpContext?.RequestServices;
-        }
         public Expression GetExpression<TModel>(Expression expression)
             where TModel : class
         {
-            var expressionFilter = GetHttpContextProvider().GetService<IExpressionFilter<TModel>>();
+            var expressionFilter = RootProvider.GetService<IExpressionFilter<TModel>>();
             return expressionFilter?.GetExpression(expression);
         }
         public Expression GetExpression(Type type, Expression expression)
