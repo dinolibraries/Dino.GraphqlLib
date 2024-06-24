@@ -61,6 +61,7 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
 
             var data = MapExpression?.FirstOrDefault(x => _authorizationService.IsAuthorized(_contextAccessor.HttpContext.User, x.Key));
 
+
             if (data?.Key == null)
             {
                 _logger?.LogWarning("No match role in maprole!");
