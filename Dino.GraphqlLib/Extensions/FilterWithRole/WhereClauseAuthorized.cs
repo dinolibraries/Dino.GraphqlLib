@@ -1,4 +1,5 @@
-﻿using Dino.GraphqlLib.Utilities;
+﻿using Dino.GraphqlLib.Authorizations;
+using Dino.GraphqlLib.Utilities;
 using EntityGraphQL.Schema;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,19 +21,19 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
     public class WhereClauseAuthorized<TModel> : IExpressionFilter<TModel>
         where TModel : class
     {
-        private readonly IGqlAuthorizationService _authorizationService;
+        private readonly AuthorizationServiceBase _authorizationService;
         private readonly IServiceProvider _serviceProvider;
         private readonly IHttpContextAccessor _contextAccessor;
         private ILogger<WhereClauseAuthorized<TModel>> _logger;
         private readonly MapExpression<TModel> MapExpression;
-        public WhereClauseAuthorized(IGqlAuthorizationService gqlAuthorizationService,
+        public WhereClauseAuthorized(AuthorizationServiceBase gqlAuthorizationService,
             IServiceProvider serviceProvider,
             IHttpContextAccessor httpContextAccessor) : this(gqlAuthorizationService, serviceProvider, null, httpContextAccessor)
         {
 
         }
         public WhereClauseAuthorized(
-            IGqlAuthorizationService gqlAuthorizationService,
+            AuthorizationServiceBase gqlAuthorizationService,
             IServiceProvider serviceProvider,
             MapExpression<TModel> keyValuePairs,
             IHttpContextAccessor httpContextAccessor
@@ -69,4 +70,5 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             return data?.Value?.Invoke(_serviceProvider);
         }
     }
+
 }

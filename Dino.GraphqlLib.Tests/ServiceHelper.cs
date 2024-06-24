@@ -2,9 +2,12 @@
 using Dino.Graphql.Api.DbContexts;
 using Dino.GraphqlLib.Extensions.FilterWithRole;
 using Dino.GraphqlLib.Infrastructures;
+using Dino.GraphqlLib.Mutations;
+using Dino.GraphqlLib.Utilities;
 using EntityGraphQL.AspNet;
 using EntityGraphQL.Schema;
 using EntityGraphQL.Schema.FieldExtensions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +42,6 @@ namespace Dino.GraphqlLib.Tests
             services.AddScoped<ComplexGraphqlSchema>();
             services.AddDbContext<Graph1DbContext>(opt => opt.UseInMemoryDatabase("Demo1"));
             services.AddDbContext<Graph2DbContext>(opt => opt.UseInMemoryDatabase("Demo2"));
-
             return services;
         }
         public const string GraphqlSiteHeaderKey = "graphql-site";
@@ -66,20 +68,20 @@ namespace Dino.GraphqlLib.Tests
             public string[] Roles { get; set; }
             public string Site { get; set; }
         }
-        public static HttpContext GetHttpContext(IServiceProvider serviceProvider,HttpContextOption httpContextOption)
+        public static HttpContext GetHttpContext(IServiceProvider serviceProvider, HttpContextOption httpContextOption)
         {
             var httpcontext = new DefaultHttpContext() { RequestServices = serviceProvider };
 
             // User is logged in
             httpcontext.User = new GenericPrincipal(
                new GenericIdentity("username"),
-               httpContextOption.Roles
+              httpContextOption.Roles
             );
 
             if (!string.IsNullOrEmpty(httpContextOption.Site))
             {
                 var identity = httpcontext.User.Identity as ClaimsIdentity;
-                httpcontext.User.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim(identity.RoleClaimType, httpContextOption.Site) }));
+                httpcontext.User.AddIdentity(new ClaimsIdentity(new Claim[] { new Claim(identity.RoleClaimType, httpContextOption.Site.GetRoleSite()) }));
             }
 
             //// User is logged out

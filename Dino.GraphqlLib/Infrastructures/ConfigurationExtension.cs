@@ -29,6 +29,7 @@ namespace Dino.GraphqlLib.Infrastructures
             serviceCollection.TryAddSingleton((IGraphQLResponseSerializer)new DefaultGraphQLResponseSerializer());
             serviceCollection.TryAddSingleton<PolicyOrRoleBasedAuthorization>();
             serviceCollection.TryAddSingleton<AuthorizationServiceBase>();
+            //serviceCollection.TryAddSingleton<IGqlAuthorizationService, AuthorizationServiceBase>();
 
             var provider = serviceCollection.BuildServiceProvider();
 

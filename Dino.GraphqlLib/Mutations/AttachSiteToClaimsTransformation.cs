@@ -24,7 +24,7 @@ namespace Dino.GraphqlLib.Mutations
             _httpContextAccessor = httpContext;
         }
 
-        public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+        public Task<ClaimsPrincipal> TransformV1Async(ClaimsPrincipal principal)
         {
 
             var _callbackAttachSite = _serviceProvider.GetService<CallbackAttachSite>();
@@ -41,6 +41,21 @@ namespace Dino.GraphqlLib.Mutations
                     principal.AddIdentity(claimsIdentity);
                 }
             }
+            return Task.FromResult(principal);
+        }
+        public Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
+        {
+
+            IEnumerable<string> enumerable = _serviceProvider.GetService<CallbackAttachSite>()?.GetSite(_httpContextAccessor.HttpContext) ?? Array.Empty<string>();
+            ClaimsIdentity claimsIdentity2 = (ClaimsIdentity)principal.Identity;
+            if (enumerable != null && enumerable.Any() && principal.Identity is ClaimsIdentity claimsIdentity)
+            {
+                foreach (string item in enumerable)
+                {
+                    claimsIdentity2.AddClaim(new Claim(claimsIdentity.RoleClaimType, item.GetRoleSite()));
+                }
+            }
+
             return Task.FromResult(principal);
         }
     }

@@ -234,26 +234,37 @@ namespace Dino.GraphqlLib.Tests
         }
 
         [Theory]
-        [InlineData(RoleHelper.AdminSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.User }, "hello1", "hello1")]
-        [InlineData(RoleHelper.AdminSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.Admin }, "hello1", "hello1")]
-        [InlineData(RoleHelper.AdminSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.Admin, RoleHelper.UserSite }, "hello1", null)]
-        [InlineData(RoleHelper.UserSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.Admin, RoleHelper.UserSite }, "hello1", "hello1")]
-        [InlineData(RoleHelper.UserSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.User, RoleHelper.UserSite }, "hello1", "hello1")]
+        [InlineData(null, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.User }, "hello1", "hello1")]
+        [InlineData(null, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.Admin }, "hello1", "hello1")]
+        [InlineData(RoleHelper.AdminSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.Admin, RoleHelper.UserSite + "-graphql-site" }, "hello1", null)]
+        [InlineData(RoleHelper.UserSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.Admin, RoleHelper.UserSite + "-graphql-site" }, "hello1", "hello1")]
+        [InlineData(RoleHelper.UserSite, new[] { RoleHelper.Admin, RoleHelper.User }, new[] { RoleHelper.User, RoleHelper.UserSite + "-graphql-site" }, "hello1", "hello1")]
         public void AttachSite(string Site, string[] roles, string[] releRequireds, string condition, string resultValue)
         {
-            var services = ServiceHelper.GetServiceCollectionBase();
-
-            services.AddGraphql<ComplexGraphqlSchema>(builder =>
+            var services = ServiceHelper.GetServiceCollection(builder =>
             {
                 builder.AddFilterExpression<DbContext>()
                 .AddSiteRoleTransformation(x =>
                 {
+                    if (string.IsNullOrEmpty(Site))
+                    {
+                        return new string[] { };
+
+                    }
                     return new[] { Site };
                 })
                 .AddAuthorizeWhereClause<Subject>((opt) =>
                 {
                     var value = condition;
-                    opt.AddRoles(roles => roles.RequiresAllRoles(releRequireds), p => x => x.Name == value);
+                    opt.AddRoles(roles => roles.RequiresAllRoles(releRequireds.Select(x=>x.ToLower()).ToArray()), p => x => x.Name == value);
+                });
+
+                builder.AddOptionConfig(option =>
+                {
+                    option.PreBuildSchemaFromContext = (context) =>
+                    {
+                        context.AddScalarType<TimeSpan>("TimeSpan");
+                    };
                 });
             });
 
@@ -289,9 +300,9 @@ namespace Dino.GraphqlLib.Tests
         }
 
         private string[][] RequiedRoles = new[] {
-            new[] { "hello3", RoleHelper.Admin, RoleHelper.UserSite },
-            new[] { "hello4", RoleHelper.Admin, RoleHelper.AdminSite },
-            new[] { "hello5", RoleHelper.User, RoleHelper.UserSite },
+            new[] { "hello3", RoleHelper.Admin, RoleHelper.UserSite.GetRoleSite() },
+            new[] { "hello4", RoleHelper.Admin, RoleHelper.AdminSite.GetRoleSite() },
+            new[] { "hello5", RoleHelper.User, RoleHelper.UserSite.GetRoleSite() },
             new[] { "hello1", RoleHelper.User } ,
             new[] { "hello2", RoleHelper.Admin },
         };
