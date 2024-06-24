@@ -57,7 +57,7 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
     - name: Pack
       run: dotnet pack --output ./artifacts --configuration Release -p:Version=$VERSION
-    - uses: actions/upload-artifact@v1
+    - uses: actions/upload-artifact@v4
       with:
         name: artifacts
         path: ./artifacts
