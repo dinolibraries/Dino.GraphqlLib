@@ -1,1 +1,1 @@
-git add .;git commit -m "fix info access denied";git update-git-for-windows
+git add .;git commit -m "fix info access denied";git push

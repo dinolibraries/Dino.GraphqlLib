@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Dino.GraphqlLib.Extensions.FilterWithRole
 {
-    public class MapExpression<TModel> : Dictionary<RequiredAuthorization, Expression<Func<TModel, bool>>>
+    public class MapExpression<TModel> : Dictionary<RequiredAuthorization, Func<IServiceProvider, Expression<Func<TModel, bool>>>>
     {
 
     }
@@ -66,8 +66,7 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
                 _logger?.LogWarning($"{typeof(TModel).Name} Resource access denied!");
                 throw new UnauthorizedAccessException($"{typeof(TModel).Name} Resource access denied!");
             }
-
-            return data?.Value;
+            return data?.Value?.Invoke(_serviceProvider);
         }
     }
 }
