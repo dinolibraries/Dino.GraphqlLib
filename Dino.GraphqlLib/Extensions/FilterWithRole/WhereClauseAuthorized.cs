@@ -1,16 +1,11 @@
 ﻿using Dino.GraphqlLib.Authorizations;
+using Dino.GraphqlLib.Loggers;
 using Dino.GraphqlLib.Utilities;
 using EntityGraphQL.Schema;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dino.GraphqlLib.Extensions.FilterWithRole
 {
@@ -66,7 +61,7 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
             {
                 _logger?.LogWarning("No match role in maprole!");
                 _logger?.LogWarning($"{typeof(TModel).Name} Resource access denied!");
-                throw new UnauthorizedAccessException($"{typeof(TModel).Name} Resource access denied!");
+                throw new GraphqlLoggerException(GraphqlErrorKey.AccessDeined, $"{typeof(TModel).Name} Resource access denied!");
             }
             return data?.Value?.Invoke(_serviceProvider);
         }

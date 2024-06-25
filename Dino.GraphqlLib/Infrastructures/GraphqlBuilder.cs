@@ -102,7 +102,6 @@ namespace Dino.GraphqlLib.Infrastructures
         internal void Build()
         {
             ValidateSchemaContext();
-
             _services.AddGraphQLSchema<TSchemaContext>(provider =>
             {
                 optionExtend?.Invoke(provider);

@@ -1,1 +1,1 @@
-git add .;git commit -m "fix info access denied";git push
+git add .;git commit -m "addition loggger feature";git push

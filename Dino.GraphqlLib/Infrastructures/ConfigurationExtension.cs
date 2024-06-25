@@ -1,5 +1,6 @@
 ﻿using Dino.GraphqlLib.Authorizations;
 using Dino.GraphqlLib.Extensions.FilterWithRole;
+using Dino.GraphqlLib.Loggers;
 using Dino.GraphqlLib.SchemaContexts;
 using Dino.GraphqlLib.SchemaProviders;
 using EntityGraphQL.AspNet;
@@ -30,8 +31,9 @@ namespace Dino.GraphqlLib.Infrastructures
             serviceCollection.TryAddSingleton<PolicyOrRoleBasedAuthorization>();
             serviceCollection.TryAddSingleton<AuthorizationServiceBase>();
             //serviceCollection.TryAddSingleton<IGqlAuthorizationService, AuthorizationServiceBase>();
-
+            serviceCollection.AddScoped<ExceptionCollection>();
             var provider = serviceCollection.BuildServiceProvider();
+            provider.UseGraphqlException();
 
             AddGraphQLOptions<TSchemaContext> addGraphQLOptions = new AddGraphQLOptions<TSchemaContext>();
 
@@ -56,10 +58,23 @@ namespace Dino.GraphqlLib.Infrastructures
             where TSchemaContext : class, ISchemaContext
         {
             services.AddScoped<TSchemaContext>();
+            services.AddScoped<GraphqlExceptionLogger>();
             var builder = new GraphqlBuilder<TSchemaContext>(services);
             action(builder);
             builder.Build();
             return services;
+        }
+        public static WebApplication UseGraphqlException(this WebApplication app)
+        {
+            var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
+            loggerFactory.AddProvider(new GraphqlExceptionProvider(app.Services));
+            return app;
+        }
+        public static IServiceProvider UseGraphqlException(this IServiceProvider app)
+        {
+            var loggerFactory = app.GetRequiredService<ILoggerFactory>();
+            loggerFactory.AddProvider(new GraphqlExceptionProvider(app));
+            return app;
         }
     }
 }

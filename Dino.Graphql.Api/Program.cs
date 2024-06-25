@@ -95,6 +95,7 @@ builder.Services.AddControllers();
 
 
 var app = builder.Build();
+
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetService<Graph1DbContext>();
@@ -129,7 +130,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline.
-
 app.UseHttpsRedirection();
 app.UseRouting();
 
