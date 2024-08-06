@@ -46,13 +46,28 @@ namespace Dino.GraphqlLib.Infrastructures
 
             return this;
         }
+
+        private bool CheckFieldName(string fieldName)
+        {
+            return !Regex.IsMatch(fieldName, "^[A-Z]");
+        }
+
         public FieldToResolve<TModel> ExtendField<TModel>(string newField)
         {
+            if (CheckFieldName(newField))
+            {
+                throw new Exception("newField must start with lower charater!");
+            }
             var field = SchemaProvider.Type<TModel>();
             return field.AddField(newField, null);
         }
+
         public FieldToResolve<TModel> ReplaceField<TModel>(string nameField)
         {
+            if (CheckFieldName(nameField))
+            {
+                throw new Exception("newField must start with lower charater!");
+            }
             var field = SchemaProvider.Type<TModel>();
             return field.ReplaceField(nameField, null);
         }
