@@ -54,7 +54,7 @@ namespace Dino.GraphqlLib.Infrastructures
 
         public FieldToResolve<TModel> ExtendField<TModel>(string newField)
         {
-            if (CheckFieldName(newField))
+            if (!CheckFieldName(newField))
             {
                 throw new Exception("newField must start with lower charater!");
             }
@@ -64,7 +64,7 @@ namespace Dino.GraphqlLib.Infrastructures
 
         public FieldToResolve<TModel> ReplaceField<TModel>(string nameField)
         {
-            if (CheckFieldName(nameField))
+            if (!CheckFieldName(nameField))
             {
                 throw new Exception("newField must start with lower charater!");
             }
