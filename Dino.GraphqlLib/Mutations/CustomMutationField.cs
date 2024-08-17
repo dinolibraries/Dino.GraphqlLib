@@ -25,10 +25,15 @@ namespace Dino.GraphqlLib.Mutations
             if (userPrincial != null && !Schema.AuthorizationService.IsAuthorized(userPrincial, RequiredAuthorization))
                 throw new EntityGraphQLAccessException($"You are not authorized to access the '{Name}' field.");
         }
-        public override Task<object> CallAsync(object context, IReadOnlyDictionary<string, object> gqlRequestArgs, IServiceProvider serviceProvider, ParameterExpression variableParameter, object docVariables)
+        public override Task<object> CallAsync(object context, IReadOnlyDictionary<string, object> gqlRequestArgs, IServiceProvider serviceProvider, ParameterExpression variableParameter, object docVariables, ExecutionOptions executionOptions)
         {
             CheckFieldAccess();
-            return base.CallAsync(context, gqlRequestArgs, serviceProvider, variableParameter, docVariables);
+            return base.CallAsync(context, gqlRequestArgs, serviceProvider, variableParameter, docVariables, executionOptions);
         }
+        //public override Task<object> CallAsync(object context, IReadOnlyDictionary<string, object> gqlRequestArgs, IServiceProvider serviceProvider, ParameterExpression variableParameter, object docVariables)
+        //{
+        //    
+        //    return base.CallAsync(context, gqlRequestArgs, serviceProvider, variableParameter, docVariables);
+        //}
     }
 }

@@ -31,5 +31,16 @@ namespace Dino.GraphqlLib.Tests
                 }
             }
             ";
+
+
+        public const string DoubleQuery = @"query Graph1DbContext {
+                                        graph1DbContext {
+                                            students(filter: ""age > 3"") {
+                                                hasPreviousPage
+                                                hasNextPage
+                                                totalItems
+                                            }
+                                        }
+                                    }";
     }
 }

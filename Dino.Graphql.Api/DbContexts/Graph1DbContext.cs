@@ -6,6 +6,7 @@ namespace Dino.Graphql.Api.DbContexts
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
+        public double Age { get; set; }
     }
     public class Subject
     {
