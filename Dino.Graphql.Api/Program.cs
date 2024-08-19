@@ -59,7 +59,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
 {
     builder
-    .ExtractSort<StudentDep>(x => new { id = x.Id })
+    //.ExtractSort<StudentDep>(x => new { id = x.Id })
     .AddFilterExpression<DbContext>() // This line will filter all fields that are DbSet in the 2 DbContexts in ComplexSchema and add extentions to it:
                                       //  - UseFilter.
                                       //  - UseOffsetPaging.
@@ -72,11 +72,12 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
     })
     .AddWhereClause<Student>(p => x => x.Name.Contains("hello1"))
     .AddWhereClause<Teacher>(p => x => x.Name.Contains("hello3"))
-    .AddAuthorizeWhereClause<Subject>((opt) =>
-    {
-        opt.AddRoles(x => x.RequiresAllRoles("Admin", SiteHelper.GetRoleSite("ADMINSITE")), p => x => x.Name == "hello2");
-        opt.AddRoles(new string[] { "User", SiteHelper.GetRoleSite("ADMINSITE") }, p => x => x.Name == "hello1");
-    })
+    //.AddAuthorizeWhereClause<Subject>((opt) =>
+    //{
+    //    opt.AddRoles(x => x.RequiresAllRoles("Admin", SiteHelper.GetRoleSite("ADMINSITE")), p => x => x.Name == "hello2");
+    //    opt.AddRoles(new string[] { "User", SiteHelper.GetRoleSite("ADMINSITE") }, p => x => x.Name == "hello1");
+    //    opt.AddRoles(new string[] { "User" }, p => x => true);
+    //})
 
     ;
 
@@ -87,6 +88,9 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
         .AddMutation<DbContextSelector1, Subject, SubjectModels.Create, SubjectModels.Update, SubjectModels.Key>()
         .AddMutation<DbContextSelector1, Student, StudentModels.Create, StudentModels.Update, StudentModels.Key>()
         ;
+
+        b.ExtendField<Subject>("studentTest")
+       .ResolveWithService<ComplexGraphqlSchema>((m, ComplexGraphqlSchema) => ComplexGraphqlSchema.Graph1DbContext.Set<Student>().FirstOrDefault(x => x.Id == m.Id));
     };
 });
 

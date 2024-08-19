@@ -1,4 +1,7 @@
 ﻿using Dino.Graphql.Api.DbContexts;
+using Dino.Graphql.Api.Mutations.DbSelectors;
+using Dino.Graphql.Api.Mutations.ModelViews;
+using Dino.Graphql.Api.Mutations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Dino.Graphql.Api;
 
 namespace Dino.GraphqlLib.Tests
 {
@@ -57,7 +61,11 @@ namespace Dino.GraphqlLib.Tests
                 builder
                 .AddFilterExpression<DbContext>()
                 ;
-
+                builder.FieldBuilder = b =>
+                {
+                    b.ExtendField<Subject>("studentTest")
+                    .ResolveWithService<ComplexGraphqlSchema>((m, p_ComplexGraphqlSchema) => p_ComplexGraphqlSchema.Graph1DbContext.Set<Student>().FirstOrDefault(x => x.Id == m.Id));
+                };
             });
 
             services.AddHttpContextAccessor();

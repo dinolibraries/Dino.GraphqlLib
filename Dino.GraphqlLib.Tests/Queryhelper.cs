@@ -62,5 +62,20 @@ namespace Dino.GraphqlLib.Tests
     }
 }
 ";
+
+        public const string ComplexFilterQuery = @"query Graph1DbContext {
+    graph1DbContext {
+        subjects(filter: ""studentTest.name.contains(\""dsdSD\"")"") {
+            totalItems
+            items {
+                studentTest {
+                    id
+                    name
+                    age
+                }
+            }
+        }
+    }
+}";
     }
 }

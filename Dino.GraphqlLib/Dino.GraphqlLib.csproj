@@ -8,7 +8,7 @@
 </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityGraphQL.AspNet" Version="5.4.0" />
+    <ProjectReference Include="..\..\..\OpenSources\EntityGraphQL\src\EntityGraphQL.AspNet\EntityGraphQL.AspNet.csproj" />
   </ItemGroup>
 
 </Project>

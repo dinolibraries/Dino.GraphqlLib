@@ -73,5 +73,18 @@ namespace Dino.GraphqlLib.Tests.BuildTests
 
             Assert.True(temp1 == 1 && temp2 == 0);
         }
+
+        [Fact]
+        public async Task ComplexFilterTest()
+        {
+            var provider = SetupSercvice();
+            //var httpAccessor = provider.GetService<IHttpContextAccessor>();
+            //httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption { });
+            var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();
+            var graphqlRequest = new QueryRequest();
+            graphqlRequest.Query = Queryhelper.ComplexFilterQuery;
+            var result = await schemaProvider.ExecuteRequestAsync(graphqlRequest, provider, null);
+            Assert.False(result.Errors?.Any() ?? false);
+        }
     }
 }
