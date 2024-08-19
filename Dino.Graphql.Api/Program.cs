@@ -9,6 +9,7 @@ using Dino.Graphql.Api.Mutations.DbSelectors;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Dino.GraphqlLib.Utilities;
+using EntityGraphQL.Schema.FieldExtensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +59,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
 {
     builder
+    .ExtractSort<StudentDep>(x => new { id = x.Id })
     .AddFilterExpression<DbContext>() // This line will filter all fields that are DbSet in the 2 DbContexts in ComplexSchema and add extentions to it:
                                       //  - UseFilter.
                                       //  - UseOffsetPaging.
@@ -74,7 +76,9 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
     {
         opt.AddRoles(x => x.RequiresAllRoles("Admin", SiteHelper.GetRoleSite("ADMINSITE")), p => x => x.Name == "hello2");
         opt.AddRoles(new string[] { "User", SiteHelper.GetRoleSite("ADMINSITE") }, p => x => x.Name == "hello1");
-    });
+    })
+
+    ;
 
     builder.FieldBuilder = b =>
     {

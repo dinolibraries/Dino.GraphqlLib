@@ -14,11 +14,11 @@ namespace Dino.GraphqlLib.Infrastructures
     public class GraphqlFieldBuilder<TSchemaContext>
         where TSchemaContext : ISchemaContext
     {
-        private readonly SchemaProvider<TSchemaContext> SchemaProvider;
+        private readonly SchemaProvider<TSchemaContext> _schemaProvider;
         private readonly IServiceCollection _services;
         public GraphqlFieldBuilder(IServiceCollection serviceDescriptors, SchemaProvider<TSchemaContext> schemaProvider)
         {
-            SchemaProvider = schemaProvider;
+            _schemaProvider = schemaProvider;
             _services = serviceDescriptors;
 
 
@@ -26,22 +26,29 @@ namespace Dino.GraphqlLib.Infrastructures
         public GraphqlMutationBuilder<TSchemaContext> AddMutationBuilder<TDbContextService>()
         {
             _services.AddScoped(typeof(IDbContextService<,,>), typeof(TDbContextService));
-            return new(SchemaProvider);
+            return new(_schemaProvider);
         }
         public GraphqlMutationBuilder<TSchemaContext> AddMutationBuilder(Type dbContextServiceType)
         {
             _services.AddScoped(typeof(IDbContextService<,,>), dbContextServiceType);
-            return new(SchemaProvider);
+            return new(_schemaProvider);
         }
-        public GraphqlFieldBuilder<TSchemaContext> RemoveField<TModel>()
+        public IEnumerable<IField> Fields<TModel>()
         {
-            var temps = SchemaProvider.Query()
+            var temps = _schemaProvider.Query()
+              .GetFields()
+              .Where(x => x.ReturnType.SchemaType.TypeDotnet == typeof(TModel));
+            return temps;
+        }
+            public GraphqlFieldBuilder<TSchemaContext> RemoveField<TModel>()
+        {
+            var temps = _schemaProvider.Query()
               .GetFields()
               .Where(x => x.ReturnType.SchemaType.TypeDotnet == typeof(TModel));
 
             foreach (var item in temps)
             {
-                SchemaProvider.Query().RemoveField(item.Name);
+                _schemaProvider.Query().RemoveField(item.Name);
             }
 
             return this;
@@ -58,7 +65,7 @@ namespace Dino.GraphqlLib.Infrastructures
             {
                 throw new Exception("newField must start with lower charater!");
             }
-            var field = SchemaProvider.Type<TModel>();
+            var field = _schemaProvider.Type<TModel>();
             return field.AddField(newField, null);
         }
 
@@ -68,8 +75,11 @@ namespace Dino.GraphqlLib.Infrastructures
             {
                 throw new Exception("newField must start with lower charater!");
             }
-            var field = SchemaProvider.Type<TModel>();
+            var field = _schemaProvider.Type<TModel>();
             return field.ReplaceField(nameField, null);
         }
+
+        public SchemaProvider<TSchemaContext> SchemaProvider { get=>_schemaProvider; }
+
     }
 }

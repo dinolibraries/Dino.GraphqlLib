@@ -3,6 +3,8 @@ using EntityGraphQL.AspNet;
 using EntityGraphQL.Schema;
 using EntityGraphQL.Schema.FieldExtensions;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace Dino.GraphqlLib.Infrastructures
 {
@@ -26,6 +28,7 @@ namespace Dino.GraphqlLib.Infrastructures
             return new GraphqlFilterBuilder(_services);
         }
         public Action<GraphqlFieldBuilder<TSchemaContext>> FieldBuilder { get; set; }
+        public Action<GraphqlFieldBuilder<TSchemaContext>> AffterFieldBuilder { get; set; }
         public Action<GraphqlMutationBuilder<TSchemaContext>> MutationBuilder { get; set; }
      
         private Type DbContexType { get; set; }
@@ -52,6 +55,12 @@ namespace Dino.GraphqlLib.Infrastructures
         {
             return !type.IsGenericType && type.IsClass && type != typeof(string);
         }
+        private IDictionary<Type, LambdaExpression> sortExpresses = new Dictionary<Type, LambdaExpression>();
+        public GraphqlBuilder<TSchemaContext> ExtractSort<TElementType>(Expression<Func<TElementType, object>> expression)
+        {
+            sortExpresses.Add(typeof(TElementType), expression);
+            return this;
+        }
         protected virtual void ConfigSchema(SchemaProvider<TSchemaContext> provider)
         {
             FieldBuilder?.Invoke(new(_services, provider));
@@ -64,13 +73,26 @@ namespace Dino.GraphqlLib.Infrastructures
                 }
                 else if (IsDbSet(field.ReturnType.TypeDotnet))
                 {
+
                     field
-                   .UseExpressionFilter()
-                   .UseSort()
-                   .UseFilter()
+                   .UseExpressionFilter();
+
+                    var typeField = field.ReturnType.TypeDotnet.GenericTypeArguments.First();
+                    if (sortExpresses.TryGetValue(typeField, out var expres))
+                    {
+                        field.AddExtension(new SortExtension(expres, false));
+                    }
+                    else
+                    {
+                        field.UseSort();
+                    }
+                    field.UseFilter()
                    .UseOffsetPaging();
                 }
             }
+            AffterFieldBuilder?.Invoke(new(_services, provider));
+
+            var tt = provider.ToGraphQLSchemaString();
         }
         private Action<AddGraphQLOptions<TSchemaContext>> optionExtend;
         public GraphqlBuilder<TSchemaContext> AddOptionConfig(Action<AddGraphQLOptions<TSchemaContext>> configure)

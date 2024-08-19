@@ -67,14 +67,23 @@ namespace Dino.GraphqlLib.Tests
         {
             public string[] Roles { get; set; }
             public string Site { get; set; }
+            public string UserName { get; set; } = "UserName";
         }
         public static HttpContext GetHttpContext(IServiceProvider serviceProvider, HttpContextOption httpContextOption)
         {
             var httpcontext = new DefaultHttpContext() { RequestServices = serviceProvider };
 
+            var identity2 = new GenericIdentity(httpContextOption.UserName);
+            if (httpContextOption.Roles != null)
+            {
+                foreach (var item in httpContextOption.Roles)
+                {
+                    identity2.AddClaim(new Claim(identity2.RoleClaimType, item));
+                }
+            }
+
             // User is logged in
-            httpcontext.User = new GenericPrincipal(
-               new GenericIdentity("username"),
+            httpcontext.User = new GenericPrincipal(identity2,
               httpContextOption.Roles
             );
 

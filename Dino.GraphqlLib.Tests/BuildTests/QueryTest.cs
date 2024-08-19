@@ -18,12 +18,60 @@ namespace Dino.GraphqlLib.Tests.BuildTests
         public async Task DoubleTest()
         {
             var provider = SetupSercvice();
-            var httpAccessor = provider.GetService<IHttpContextAccessor>();
-            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption { });
+            //var httpAccessor = provider.GetService<IHttpContextAccessor>();
+            //httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption { });
             var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();
             var graphqlRequest = new QueryRequest();
             graphqlRequest.Query = Queryhelper.DoubleQuery;
             var result = await schemaProvider.ExecuteRequestAsync(graphqlRequest, provider, null);
+            Assert.False(result.Errors?.Any() ?? false);
+        }
+        [Fact]
+        public async Task GuidTest()
+        {
+            var provider = SetupSercvice();
+            //var httpAccessor = provider.GetService<IHttpContextAccessor>();
+            //httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption { });
+            var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();
+            var graphqlRequest = new QueryRequest();
+            graphqlRequest.Query = Queryhelper.GuidQuery;
+            var result = await schemaProvider.ExecuteRequestAsync(graphqlRequest, provider, null);
+            Assert.False(result.Errors?.Any() ?? false);
+        }
+        [Fact]
+        public async Task CacheTest()
+        {
+            var provider = SetupSercvice(new ServiceOption
+            {
+                Name = "hello1",
+                Roles = new string[] { RoleHelper.User }
+            });
+            var httpAccessor = provider.GetService<IHttpContextAccessor>();
+            var schemaProvider = provider.GetService<SchemaProvider<ComplexGraphqlSchema>>();
+            var graphqlRequest = new QueryRequest();
+
+            graphqlRequest.Query = Queryhelper.SubjectListQuery;
+
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption
+            {
+                Roles = new string[] { RoleHelper.User }
+            });
+            var result = await schemaProvider.ExecuteRequestAsync(graphqlRequest, provider, httpAccessor.HttpContext.User);
+
+            httpAccessor.HttpContext = ServiceHelper.GetHttpContext(provider, new ServiceHelper.HttpContextOption
+            {
+                Roles = new string[] { RoleHelper.Manage }
+            });
+
+            var result2 = await schemaProvider.ExecuteRequestAsync(graphqlRequest, provider, httpAccessor.HttpContext.User);
+
+            var value1 = result.Data.Values.FirstOrDefault() as dynamic;
+            var temp1 = value1?.subjects?.totalItems as int?;
+
+            var value2 = result2.Data.Values.FirstOrDefault() as dynamic;
+            var temp2 = value2?.subjects?.totalItems as int?;
+
+            Assert.True(temp1 == 1 && temp2 == 0);
         }
     }
 }

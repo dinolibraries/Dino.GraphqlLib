@@ -42,5 +42,25 @@ namespace Dino.GraphqlLib.Tests
                                             }
                                         }
                                     }";
+        public const string GuidQuery = @"query Graph1DbContext {
+    graph1DbContext {
+        students(filter: ""id==\""d0c80088-6f32-458e-86eb-2f695d764eb1\"""") {
+            hasPreviousPage
+            hasNextPage
+            totalItems
+        }
+    }
+}
+";
+        public const string SubjectListQuery = @"query Graph1DbContext {
+    graph1DbContext {
+        subjects {
+            hasPreviousPage
+            hasNextPage
+            totalItems
+        }
+    }
+}
+";
     }
 }

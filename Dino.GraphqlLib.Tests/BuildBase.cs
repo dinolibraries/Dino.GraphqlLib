@@ -1,4 +1,5 @@
 ﻿using Dino.Graphql.Api.DbContexts;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -19,6 +20,11 @@ namespace Dino.GraphqlLib.Tests
         {
             public string[] Roles { get; set; } = new string[0];
             public string Name { get; set; }
+            public string ManageName { get; set; }
+        }
+        private string GetUserId(IServiceProvider provider)
+        {
+            return provider.GetService<IHttpContextAccessor>().HttpContext.User.IsInRole(RoleHelper.User) ? "hello1" : "";
         }
         protected virtual IServiceProvider SetupSercvice(ServiceOption serviceOption)
         {
@@ -34,7 +40,7 @@ namespace Dino.GraphqlLib.Tests
                 .AddAuthorizeWhereClause<Subject>((option) =>
                 {
                     option.AddRoles(requird => requird.RequiresAllRoles(serviceOption.Roles), p => x => x.Name == serviceOption.Name);
-                    option.AddRoles(requird => requird.RequiresAllRoles(RoleHelper.Manage), p => x => x.Name == serviceOption.Name);
+                    option.AddRoles(requird => requird.RequiresAllRoles(RoleHelper.Manage), p => x => x.Name == serviceOption.ManageName);
                 });
             });
 
