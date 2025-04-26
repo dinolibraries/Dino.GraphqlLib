@@ -47,10 +47,10 @@ namespace Dino.GraphqlLib.Extensions
                 return expression;
             }
 
-            if (arguments != null && !string.IsNullOrEmpty(arguments?.SeedKey) && !string.IsNullOrEmpty(arguments?.Field))
+            if (arguments != null && !string.IsNullOrEmpty(arguments?.SeedKey) && !string.IsNullOrEmpty(arguments?.SeedField))
             {
 
-                var fieldExpression = listType.BuildChecksumExpression(arguments.Field as string, arguments.SeedKey as string);
+                var fieldExpression = listType.BuildChecksumExpression(arguments.SeedField as string, arguments.SeedKey as string);
                 expression = Expression.Call(isQueryable ? typeof(Queryable) : typeof(Enumerable),"OrderBy",new Type[] { listType, typeof(int) },
                                             expression,
                                             fieldExpression
