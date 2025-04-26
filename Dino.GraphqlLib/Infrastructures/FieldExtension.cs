@@ -1,5 +1,6 @@
 ﻿using Dino.GraphqlLib.Extensions;
 using Dino.GraphqlLib.Extensions.FilterWithRole;
+using Dino.GraphqlLib.Extensions.RandomWithSeed;
 using EntityGraphQL.Schema;
 using EntityGraphQL.Schema.FieldExtensions;
 using System;

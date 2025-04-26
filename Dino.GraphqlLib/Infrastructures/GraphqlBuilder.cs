@@ -76,8 +76,9 @@ namespace Dino.GraphqlLib.Infrastructures
                 {
 
                     field
+                   .UseFilter()
                    .UseExpressionFilter();
-                    field.UseRandomWithSeed();
+
                     var typeField = field.ReturnType.TypeDotnet.GenericTypeArguments.First();
                     if (sortExpresses.TryGetValue(typeField, out var expres))
                     {
@@ -87,7 +88,8 @@ namespace Dino.GraphqlLib.Infrastructures
                     {
                         field.UseSort();
                     }
-                    field.UseFilter()
+
+                    field.UseRandomWithSeed()
                    .UseOffsetPaging();
                 }
             }
