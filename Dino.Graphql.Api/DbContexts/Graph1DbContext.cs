@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Dino.GraphqlLib.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dino.Graphql.Api.DbContexts
 {
@@ -38,6 +39,11 @@ namespace Dino.Graphql.Api.DbContexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            //modelBuilder
+            //.HasDbFunction(() => EFDbFunctionHelper.Checksum(default, default))
+            //.HasName("CHECKSUM");
+
             //modelBuilder.Entity<StudentDep>()
             //    .HasOne(x => x.Student)
             //    .WithMany(x=>x.Students);

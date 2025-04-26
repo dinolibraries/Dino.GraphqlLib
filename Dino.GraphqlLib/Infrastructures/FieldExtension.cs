@@ -1,5 +1,7 @@
-﻿using Dino.GraphqlLib.Extensions.FilterWithRole;
+﻿using Dino.GraphqlLib.Extensions;
+using Dino.GraphqlLib.Extensions.FilterWithRole;
 using EntityGraphQL.Schema;
+using EntityGraphQL.Schema.FieldExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,11 @@ namespace Dino.GraphqlLib.Infrastructures
         {
             // register extension on field
             field.AddExtension(new ExpressionFilterFieldExtension());
+            return field;
+        }
+        public static IField UseRandomWithSeed(this IField field)
+        {
+            field.AddExtension(new RandomWithSeedExtension());
             return field;
         }
     }

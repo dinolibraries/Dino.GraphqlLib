@@ -1,4 +1,5 @@
-﻿using Dino.GraphqlLib.SchemaContexts;
+﻿using Dino.GraphqlLib.Extensions;
+using Dino.GraphqlLib.SchemaContexts;
 using EntityGraphQL.AspNet;
 using EntityGraphQL.Schema;
 using EntityGraphQL.Schema.FieldExtensions;
@@ -76,7 +77,7 @@ namespace Dino.GraphqlLib.Infrastructures
 
                     field
                    .UseExpressionFilter();
-
+                    field.UseRandomWithSeed();
                     var typeField = field.ReturnType.TypeDotnet.GenericTypeArguments.First();
                     if (sortExpresses.TryGetValue(typeField, out var expres))
                     {

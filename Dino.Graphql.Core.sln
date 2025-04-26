@@ -9,10 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dino.GraphqlLib.Tests", "Di
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dino.Graphql.Api", "Dino.Graphql.Api\Dino.Graphql.Api.csproj", "{5080447A-1ABE-421A-B9F2-D626EB436337}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityGraphQL", "..\..\OpenSources\EntityGraphQL\src\EntityGraphQL\EntityGraphQL.csproj", "{9F7AA7E1-1D6C-4633-90B4-35A3DD60365B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EntityGraphQL.AspNet", "..\..\OpenSources\EntityGraphQL\src\EntityGraphQL.AspNet\EntityGraphQL.AspNet.csproj", "{57C1FCEE-F8F9-4147-AB78-B5330CCE60D6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,14 +27,6 @@ Global
 		{5080447A-1ABE-421A-B9F2-D626EB436337}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5080447A-1ABE-421A-B9F2-D626EB436337}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5080447A-1ABE-421A-B9F2-D626EB436337}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9F7AA7E1-1D6C-4633-90B4-35A3DD60365B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9F7AA7E1-1D6C-4633-90B4-35A3DD60365B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9F7AA7E1-1D6C-4633-90B4-35A3DD60365B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9F7AA7E1-1D6C-4633-90B4-35A3DD60365B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{57C1FCEE-F8F9-4147-AB78-B5330CCE60D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{57C1FCEE-F8F9-4147-AB78-B5330CCE60D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{57C1FCEE-F8F9-4147-AB78-B5330CCE60D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{57C1FCEE-F8F9-4147-AB78-B5330CCE60D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
