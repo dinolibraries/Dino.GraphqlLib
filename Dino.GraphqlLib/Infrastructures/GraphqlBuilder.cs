@@ -1,4 +1,5 @@
 ﻿using Dino.GraphqlLib.Extensions;
+using Dino.GraphqlLib.Extensions.SortDefault;
 using Dino.GraphqlLib.SchemaContexts;
 using EntityGraphQL.AspNet;
 using EntityGraphQL.Schema;
@@ -90,6 +91,7 @@ namespace Dino.GraphqlLib.Infrastructures
                     }
 
                     field.UseRandomWithSeed()
+                    .AddExtension(new SortDefaultExtension())
                    .UseOffsetPaging();
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using Dino.GraphqlLib.Common;
+using Dino.GraphqlLib.Extensions.SortDefault;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dino.Graphql.Api.DbContexts
@@ -28,6 +29,7 @@ namespace Dino.Graphql.Api.DbContexts
         {
 
         }
+        //[GraphqlSortDefault(nameof(Student.Id))]
         public DbSet<Student> Students { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<StudentDep> StudentDeps { get; set; }
@@ -39,7 +41,6 @@ namespace Dino.Graphql.Api.DbContexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
             //modelBuilder
             //.HasDbFunction(() => EFDbFunctionHelper.Checksum(default, default))
             //.HasName("CHECKSUM");
