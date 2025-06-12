@@ -63,6 +63,12 @@ namespace Dino.GraphqlLib.Infrastructures
             sortExpresses.Add(typeof(TElementType), expression);
             return this;
         }
+        private int _MaxPageZize { get; set; } = 500;
+        public GraphqlBuilder<TSchemaContext> AddMaxPageSize(int pageSize)
+        {
+            _MaxPageZize = pageSize;
+            return this;
+        }
         protected virtual void ConfigSchema(SchemaProvider<TSchemaContext> provider)
         {
             FieldBuilder?.Invoke(new(_services, provider));
@@ -92,7 +98,7 @@ namespace Dino.GraphqlLib.Infrastructures
 
                     field.UseRandomWithSeed()
                     .AddExtension(new SortDefaultExtension())
-                   .UseOffsetPaging();
+                   .UseOffsetPaging(_MaxPageZize, _MaxPageZize);
                 }
             }
             AffterFieldBuilder?.Invoke(new(_services, provider));
