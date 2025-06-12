@@ -47,6 +47,26 @@ namespace Dino.GraphqlLib.Extensions.SortDefault
         {
 
         }
+        private void GetSortFieldName(MemberInfo memberInfo)
+        {
+            var propInfo = listType.GetProperty("Id");
+            orderType = propInfo?.PropertyType;
+            primarykeyName = propInfo?.Name;
+            
+            if (Attribute.IsDefined(memberInfo, typeof(GraphqlSortDefaultAttribute)))
+            {
+                var attribute = memberInfo.GetCustomAttribute<GraphqlSortDefaultAttribute>();
+                if (attribute?.KeyName != null)
+                {
+                    primarykeyName = attribute.KeyName;
+                    var property = listType.GetProperty(primarykeyName);
+                    if (property != null)
+                    {
+                        orderType = property.PropertyType;
+                    }
+                }
+            }
+        }
         public override void Configure(ISchemaProvider schema, IField field)
         {
 
@@ -64,20 +84,9 @@ namespace Dino.GraphqlLib.Extensions.SortDefault
             isQueryable = typeof(IQueryable).IsAssignableFrom(field.ResolveExpression.Type);
             if (field.ResolveExpression is MemberExpression propExpre)
             {
-                var propInfo = listType.GetProperty("Id");
-                orderType = propInfo?.PropertyType;
-                primarykeyName = propInfo?.Name;
-                if (Attribute.IsDefined(propExpre.Member, typeof(GraphqlSortDefaultAttribute)))
-                {
-                    primarykeyName = propExpre.Member.GetCustomAttribute<GraphqlSortDefaultAttribute>()?.KeyName;
-                }
+                GetSortFieldName(propExpre.Member);
             }
 
-        }
-        public class Student
-        {
-            public Guid Id { get; set; }
-            public string Name { get; set; }
         }
         public override Expression GetExpression(IField field, Expression expression, ParameterExpression argumentParam, dynamic arguments, Expression context, IGraphQLNode parentNode, bool servicesPass, ParameterReplacer parameterReplacer)
         {
