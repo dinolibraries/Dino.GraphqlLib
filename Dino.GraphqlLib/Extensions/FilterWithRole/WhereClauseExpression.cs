@@ -20,7 +20,7 @@ namespace Dino.GraphqlLib.Extensions.FilterWithRole
         public Expression WhereClause { get; set; }
         protected override Expression VisitMember(MemberExpression node)
         {
-            if (WhereClause != null && IsQueryAble(node.Type))
+            if (WhereClause != null && WhereClause is LambdaExpression lamdaWhere && lamdaWhere.Parameters.FirstOrDefault()?.Type == node.Type.GenericTypeArguments.FirstOrDefault() && IsQueryAble(node.Type))
             {
                 var expres = Expression.Call(typeof(Queryable), nameof(Queryable.Where), new[] { node.Type.GenericTypeArguments[0] }, node, WhereClause);
                 return expres;
