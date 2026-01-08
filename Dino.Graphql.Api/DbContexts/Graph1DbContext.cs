@@ -31,6 +31,16 @@ namespace Dino.Graphql.Api.DbContexts
         }
         //[GraphqlSortDefault(nameof(Student.Id))]
         public DbSet<Student> Students { get; set; }
+        public IQueryable<Student> Students2
+        {
+            get
+            {
+
+                var test = Students.OrderBy(x => Guid.NewGuid()).Select(x => x);
+                var tt = test.Expression.HasOrderBy();
+                return test;
+            }
+        }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<StudentDep> StudentDeps { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
