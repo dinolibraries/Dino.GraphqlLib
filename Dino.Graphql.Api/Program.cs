@@ -1,15 +1,17 @@
 using Dino.Graphql.Api;
 using Dino.Graphql.Api.DbContexts;
-using Microsoft.EntityFrameworkCore;
-using EntityGraphQL.AspNet;
-using Dino.GraphqlLib.Infrastructures;
 using Dino.Graphql.Api.Mutations;
-using Dino.Graphql.Api.Mutations.ModelViews;
 using Dino.Graphql.Api.Mutations.DbSelectors;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Dino.Graphql.Api.Mutations.ModelViews;
+using Dino.GraphqlLib.Extensions.GroupFiltes;
+using Dino.GraphqlLib.Extensions.SortDefault;
+using Dino.GraphqlLib.Infrastructures;
 using Dino.GraphqlLib.Utilities;
+using EntityGraphQL.AspNet;
 using EntityGraphQL.Schema.FieldExtensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,8 +72,8 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
         context.User.IsInRole(SiteHelper.GetRoleSite("ADMIN")); // True
         return context.Request.Path.StartsWithSegments("/admin") ? new[] { "ADMIN" } : null;
     })
-    .AddWhereClause<Student>(p => x => x.Name.Contains("hello1"))
-    .AddWhereClause<Teacher>(p => x => x.Name.Contains("hello3"))
+    //.AddWhereClause<Student>(p => x => x.Name.Contains("hello1"))
+    //.AddWhereClause<Teacher>(p => x => x.Name.Contains("hello3"))
     //.AddAuthorizeWhereClause<Subject>((opt) =>
     //{
     //    opt.AddRoles(x => x.RequiresAllRoles("Admin", SiteHelper.GetRoleSite("ADMINSITE")), p => x => x.Name == "hello2");
@@ -91,6 +93,11 @@ builder.Services.AddGraphql<ComplexGraphqlSchema>(builder =>
 
         b.ExtendField<Subject>("studentTest")
        .ResolveWithService<ComplexGraphqlSchema>((m, ComplexGraphqlSchema) => ComplexGraphqlSchema.Graph1DbContext.Set<Student>().FirstOrDefault(x => x.Id == m.Id));
+
+
+        b.ExtendField<Student>("studentsub")
+      .ResolveWithService<ComplexGraphqlSchema>((m, ComplexGraphqlSchema) => ComplexGraphqlSchema.Graph1DbContext.Set<StudentDep>().Where(x=>x.StudentId == m.Id))
+      .UseFieldPaging();
     };
 });
 
@@ -132,6 +139,45 @@ using (var scope = app.Services.CreateScope())
                     {
                         Id = Guid.Parse("8889ba81-c75b-4c07-91ca-513760f13378"),
                         Name = "hello5"
+                    }
+                });
+    // add student
+    context.Students.AddRange(new[] {
+                    new Student
+                    {
+                        Id = Guid.Parse("2229ba81-c75b-4c07-91ca-513760f13375"),
+                        Name = "student1"
+                    },
+                    new Student
+                    {
+                        Id = Guid.Parse("3339ba81-c75b-4c07-91ca-513760f13375"),
+                        Name = "student2"
+                    },
+                    new Student
+                    {
+                        Id = Guid.Parse("4449ba81-c75b-4c07-91ca-513760f13375"),
+                        Name = "student3"
+                    }
+                });
+    // student dep
+    context.StudentDeps.AddRange(new[] {
+                    new StudentDep
+                    {
+                        Id = Guid.Parse("5559ba81-c75b-4c07-91ca-513760f13375"),
+                        StudentId = Guid.Parse("2229ba81-c75b-4c07-91ca-513760f13375"),
+                        Description = "dep1"
+                    },
+                    new StudentDep
+                    {
+                        Id = Guid.Parse("6669ba81-c75b-4c07-91ca-513760f13375"),
+                        StudentId = Guid.Parse("2229ba81-c75b-4c07-91ca-513760f13375"),
+                        Description = "dep2"
+                    },
+                    new StudentDep
+                    {
+                        Id = Guid.Parse("7779ba81-c75b-4c07-91ca-513760f13375"),
+                        StudentId = Guid.Parse("3339ba81-c75b-4c07-91ca-513760f13375"),
+                        Description = "dep3"
                     }
                 });
     context.SaveChanges();

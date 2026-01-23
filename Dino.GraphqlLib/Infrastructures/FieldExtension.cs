@@ -24,5 +24,10 @@ namespace Dino.GraphqlLib.Infrastructures
             field.AddExtension(new RandomWithSeedExtension());
             return field;
         }
+        public static IField UseFieldPaging(this IField field, int defaultPageSize = 10, int maxPageSize = 50)
+        {
+            field.AddExtension(new Extensions.GroupFiltes.FieldPagingExtension(defaultPageSize, maxPageSize));
+            return field;
+        }
     }
 }

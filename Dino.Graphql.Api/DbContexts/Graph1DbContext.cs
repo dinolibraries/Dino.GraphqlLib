@@ -18,11 +18,13 @@ namespace Dino.Graphql.Api.DbContexts
     }
     public class StudentDep
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public Guid StudentId { get; set; }
         public Student Student { get; set; }
     }
+    
     public class Graph1DbContext : DbContext
     {
         public Graph1DbContext(DbContextOptions<Graph1DbContext> dbContextOptions) : base(dbContextOptions)
@@ -55,9 +57,10 @@ namespace Dino.Graphql.Api.DbContexts
             //.HasDbFunction(() => EFDbFunctionHelper.Checksum(default, default))
             //.HasName("CHECKSUM");
 
-            //modelBuilder.Entity<StudentDep>()
-            //    .HasOne(x => x.Student)
-            //    .WithMany(x=>x.Students);
+            modelBuilder.Entity<StudentDep>()
+                .HasOne(x => x.Student)
+                .WithMany(x => x.Students)
+                .HasForeignKey(x=>x.StudentId);
         }
     }
 }
