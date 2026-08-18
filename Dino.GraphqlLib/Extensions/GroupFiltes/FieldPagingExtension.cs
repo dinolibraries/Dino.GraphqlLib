@@ -25,7 +25,7 @@ namespace Dino.GraphqlLib.Extensions.GroupFiltes
 
         public List<IFieldExtension> Extensions { get; private set; } = new List<IFieldExtension>();
 
-        public FieldPagingExtension(int defaultPageSize=50, int maxPageSize = 50)
+        public FieldPagingExtension(int defaultPageSize = 50, int maxPageSize = 50)
         {
             this.defaultPageSize = defaultPageSize;
             this.maxPageSize = maxPageSize;
@@ -48,10 +48,7 @@ namespace Dino.GraphqlLib.Extensions.GroupFiltes
                 throw new EntityGraphQLCompilerException("GroupFilterPagingExtension cannot be used on a mutation field " + field.Name);
             }
             field.AddArguments(new FieldPagingOffsetArgs());
-            if (defaultPageSize.HasValue)
-            {
-                field.Arguments["take"].DefaultValue = defaultPageSize.Value;
-            }
+            field.Arguments["take"].DefaultValue = new DefaultArgValue(defaultPageSize.HasValue, defaultPageSize.Value);
             listType = field.ReturnType.TypeDotnet.GetEnumerableOrArrayType();
             isQueryable = typeof(IQueryable).IsAssignableFrom(field.ResolveExpression.Type);
         }
@@ -85,7 +82,8 @@ namespace Dino.GraphqlLib.Extensions.GroupFiltes
                     Expression.Convert(Expression.Property(argumentParam, "Skip"), typeof(int))
                 );
             }
-            else {
+            else
+            {
                 groupedExpression = Expression.Call(
                     isQueryable ? typeof(Queryable) : typeof(Enumerable),
                     "Skip",
@@ -94,7 +92,8 @@ namespace Dino.GraphqlLib.Extensions.GroupFiltes
                     Expression.Constant(0)
                 );
             }
-            if (argumentParam != null) {
+            if (argumentParam != null)
+            {
                 groupedExpression = Expression.Call(
                     isQueryable ? typeof(Queryable) : typeof(Enumerable),
                     "Take",
