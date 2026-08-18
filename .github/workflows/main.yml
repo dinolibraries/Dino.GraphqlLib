@@ -2,8 +2,11 @@ name: Build & Publish NuGet
 
 on:
   push:
-    branches: master
-    tags: '**'
+    branches:
+      - master
+      - main
+    tags:
+      - '**'
   pull_request:
 
 jobs:
@@ -11,12 +14,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x  # use the latest SDK; multi-target builds are supported
+        dotnet-version: |
+          8.0.x
+          9.0.x
 
     - name: Restore dependencies
       run: dotnet restore
@@ -33,12 +40,16 @@ jobs:
     if: github.event_name == 'push'
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x
+        dotnet-version: |
+          8.0.x
+          9.0.x
 
     - name: Determine version
       id: get_version
@@ -47,10 +58,11 @@ jobs:
     - name: Pack NuGet package
       run: dotnet pack --output ./artifacts --configuration Release -p:Version=$VERSION
 
-    - uses: actions/upload-artifact@v4
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
       with:
         name: artifacts
-        path: ./artifacts
+        path: ./artifacts/*.nupkg
 
   publish:
     runs-on: ubuntu-latest
@@ -58,17 +70,18 @@ jobs:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.x
+        dotnet-version: 8.0.x
 
-    - uses: actions/download-artifact@v4
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
       with:
         name: artifacts
         path: ./artifacts
 
     - name: Publish packages to NuGet
-      run: dotnet nuget push ./artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{secrets.NUGET_TOKEN}}
+      run: dotnet nuget push ./artifacts/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_TOKEN }} --skip-duplicate
