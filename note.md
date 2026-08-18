@@ -1,1 +1,1 @@
-git add .;git commit -m "upgrade-graphql-5.7.3";git push
+git add .;git commit -m "optimized-checksum";git push

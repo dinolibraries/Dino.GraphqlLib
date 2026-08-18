@@ -10,5 +10,10 @@ namespace Dino.GraphqlLib.Common
     {
         //[DbFunction("CHECKSUM", IsBuiltIn = true)]
         public static int Checksum(string id, string seed) => HashCode.Combine(id, seed);
+        public static int Checksum(Guid id, string seed) => HashCode.Combine(id, seed);
+        public static int Checksum(int id, string seed) => HashCode.Combine(id, seed);
+        public static int Checksum(decimal id, string seed) => HashCode.Combine(id, seed);
+        public static int Checksum(float id, string seed) => HashCode.Combine(id, seed);
+        public static int Checksum(DateTime id, string seed) => HashCode.Combine(id, seed);
     }
 }
